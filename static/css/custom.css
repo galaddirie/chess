@@ -1,0 +1,66 @@
+:root{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+
+}
+/*CHESS BOARD*/
+#game{
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    align-items: center;
+    margin: auto;
+}
+#game h1{
+    margin-left: 12.5%;
+}
+.board{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap-reverse;
+    
+    width: 40vw;
+    height: 40vw;
+}
+.row{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    
+}
+.cell{
+    width: 12.5%;
+    display: flex;
+    
+    
+}
+.white{
+    background-color: #F5E6BF;
+}
+.black{
+    background-color: #66443A;
+}
+.cell span{
+    display: flex;
+    align-items: flex-end;
+    color: rgb(0, 0, 0);
+}
+
+.rowID{
+    border-right: 2px solid black;
+}
+.cell.columnID{
+    border-top: 2px solid black;
+}
+.cell.rowID{
+    font-size: 2em;
+    
+    justify-content: center;
+    align-items: center;
+}
+.cell.columnID{
+    font-size: 2em;
+    justify-content: center;
+    align-items: center;
+}
