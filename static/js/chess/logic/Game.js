@@ -1,6 +1,7 @@
 
 import {Square} from './Square.js'
 import {Piece} from './Piece.js'
+import imageConfig from '../config/images.js'
 export class Game{
     constructor(isWhite, gameConfig){
         this.isWhite = isWhite
@@ -23,7 +24,8 @@ export class Game{
                     const initalPiece = gameConfig[id].split('_')
                     const name =initalPiece[1], 
                     color = initalPiece[0]
-                    piece = new Piece(name, id, false, color) 
+                    const image = imageConfig[gameConfig[id]]
+                    piece = new Piece(name, id, false, color,image) 
                 }
                 const cell = new Square(id, piece)
                 table[i-1].push(cell)

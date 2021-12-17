@@ -2,7 +2,8 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-
+    --chessWhite: #F5E6BF;
+    --chessBlack: #66443A
 }
 /*CHESS BOARD*/
 #game{
@@ -12,18 +13,17 @@
     align-items: center;
     margin: auto;
 }
-#game h1{
-    margin-left: 12.5%;
-}
+
 .board{
     /* margin-top: 20px; */
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    width: 40vw;
-    height: 40vw;
-    min-width: 600px;
-    min-height: 600px;
+    width: 30vw;
+    height: 30vw;
+    min-width: 500px;
+    min-height: 500px;
+    border: 2px solid black;
 }
 
 @media (max-width: 600px) {
@@ -32,22 +32,11 @@
         min-height: 340px;
     }
 }
+
 .board.isPLayingWhite{
     flex-wrap: wrap-reverse;
 }
 
-
-.cell.rowID{
-    font-size: 2em;
-    justify-content: center;
-    align-items: center;
-}
-
-.cell.columnID{
-    font-size: 2em;
-    justify-content: center;
-    align-items: center;
-}
 
 .row{
     display: flex;
@@ -57,19 +46,33 @@
 .cell{
     width: 12.5%;
     display: flex;
-    justify-content: right;
-    
+    padding: 5px;   
 }
+.cell .notation-letter{
+    justify-content: right;
+    margin-left: auto;
+}
+.cell .notation-num{
+    align-self: flex-end;
+}
+.isPLayingWhite .cell .notation-letter{
+    align-self: flex-end;
+    justify-content: right;
+    margin-left: auto;
+}
+
+.isPLayingWhite .cell .notation-num{
+    align-self: flex-start;
+}
+
+
 .white{
-    background-color: #F5E6BF;
+    background-color: var(--chessWhite);
+    color: var(--chessBlack);
 }
 .black{
-    background-color: #66443A;
+    background-color: var(--chessBlack);
+    color: var(--chessWhite);
 }
-.cell span{
-    display: none;
-    align-self: flex-end;
-    color: rgb(0, 0, 0);
-    font-size: 1.5em;
-}
+
 
