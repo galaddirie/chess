@@ -16,7 +16,7 @@
     margin-left: 12.5%;
 }
 .board{
-    margin-top: 20px;
+    /* margin-top: 20px; */
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -28,8 +28,8 @@
 
 @media (max-width: 600px) {
     .board{
-        min-width: 300px;
-        min-height: 300px;
+        min-width: 340px;
+        min-height: 340px;
     }
 }
 .board.isPLayingWhite{
@@ -52,8 +52,7 @@
 .row{
     display: flex;
     flex-direction: row;
-    width: 100%;
-    
+    width: 100%; 
 }
 .cell{
     width: 12.5%;
