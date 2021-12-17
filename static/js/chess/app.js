@@ -1,8 +1,10 @@
+import {Game} from './logic/Game.js'
+import gameConfig from './config/initalGame.js'
 
 function createBoard(){
     
     var board = document.createElement('div');
-    board.className = 'board'
+    board.className = 'board isPLayingWhite'
     var cells = 8
     var rows = 8
     var letters = ['a','b','c','d','e','f','g','h',]
@@ -32,7 +34,7 @@ function createBoard(){
             celltext.append(letters[j-1] + String(i))
 
             cell.appendChild(celltext)
-            
+
             if (i%2 == j%2) {
                 cell.className = 'cell inPlay black';  
             } else {
@@ -48,3 +50,5 @@ function createBoard(){
 }
 var game = document.getElementById('game')
 game.appendChild(createBoard());
+
+game = new Game(true, gameConfig)

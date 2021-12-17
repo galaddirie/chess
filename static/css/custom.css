@@ -18,11 +18,29 @@
 .board{
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap-reverse;
+    flex-wrap: wrap;
     
     width: 40vw;
     height: 40vw;
 }
+
+.board.isPLayingWhite{
+    flex-wrap: wrap-reverse;
+}
+
+
+.cell.rowID{
+    font-size: 2em;
+    justify-content: center;
+    align-items: center;
+}
+
+.cell.columnID{
+    font-size: 2em;
+    justify-content: center;
+    align-items: center;
+}
+
 .row{
     display: flex;
     flex-direction: row;
@@ -32,7 +50,7 @@
 .cell{
     width: 12.5%;
     display: flex;
-    
+    justify-content: right;
     
 }
 .white{
@@ -42,25 +60,7 @@
     background-color: #66443A;
 }
 .cell span{
-    display: flex;
-    align-items: flex-end;
+    align-self: flex-end;
     color: rgb(0, 0, 0);
 }
 
-.rowID{
-    border-right: 2px solid black;
-}
-.cell.columnID{
-    border-top: 2px solid black;
-}
-.cell.rowID{
-    font-size: 2em;
-    
-    justify-content: center;
-    align-items: center;
-}
-.cell.columnID{
-    font-size: 2em;
-    justify-content: center;
-    align-items: center;
-}

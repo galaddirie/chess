@@ -1,4 +1,4 @@
-class Piece{
+export class Piece{
     constructor(name, id, isAttacked, color){
         this.name = name
         this.color = color
@@ -14,3 +14,4 @@ class Piece{
         return this.id
     }
 }
+
