@@ -16,14 +16,22 @@
     margin-left: 12.5%;
 }
 .board{
+    margin-top: 20px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    
     width: 40vw;
     height: 40vw;
+    min-width: 600px;
+    min-height: 600px;
 }
 
+@media (max-width: 600px) {
+    .board{
+        min-width: 300px;
+        min-height: 300px;
+    }
+}
 .board.isPLayingWhite{
     flex-wrap: wrap-reverse;
 }
@@ -60,7 +68,9 @@
     background-color: #66443A;
 }
 .cell span{
+    display: none;
     align-self: flex-end;
     color: rgb(0, 0, 0);
+    font-size: 1.5em;
 }
 
