@@ -6,8 +6,7 @@ export class Game{
     constructor(isWhite, gameConfig){
         this.isWhite = isWhite
         this.board = this.generateBoard(gameConfig)
-        this.whiteInCheck = false
-        this.blackInCheck = false
+        
     }
     generateBoard(gameConfig){
         //generate the board the inital piece setup in the gameConfig
@@ -25,7 +24,7 @@ export class Game{
                     const name =initalPiece[1], 
                     color = initalPiece[0]
                     const image = imageConfig[gameConfig[id]]
-                    piece = new Piece(name, id, false, color,image) 
+                    piece = new Piece(name, id, color, image) 
                 }
                 const cell = new Square(id, piece)
                 table[i-1].push(cell)
