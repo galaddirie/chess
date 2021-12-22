@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.base import Model
 from django.core.cache import cache 
-import datetime
+import datetime, pytz
 from chess import settings
 
 # Create your models here.
@@ -17,18 +17,17 @@ class Profile(models.Model):
 
     def last_seen(self):
         result = cache.get(f'seen_{self.user.username}')
-        if not result:
-            return self.last_activity
+        # if not result:
+        #     return self.last_activity
         return result
 
     def online(self):
         if self.last_seen():
             now = datetime.datetime.now()
-            if now > self.last_seen() + datetime.timedelta(
-                        seconds=settings.USER_ONLINE_TIMEOUT):
-                return False
-            else:
-                return True
+            now = pytz.utc.localize(now)
+            last = (self.last_seen() + datetime.timedelta(seconds=settings.USER_ONLINE_TIMEOUT))
+            last = pytz.utc.localize(last)
+            return now > last      
         else:
             return False   
     

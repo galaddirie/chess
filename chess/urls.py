@@ -20,11 +20,13 @@ from django.conf.urls.static import static
 from django.urls import path,include
 
 from users import views as user_views
+from chess_app import views as game_views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'users', user_views.UserViewSet)
 router.register(r'profiles', user_views.ProfileViewSet)
+router.register(r'games', game_views.GameViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

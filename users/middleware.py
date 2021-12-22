@@ -17,7 +17,7 @@ class ActiveUserMiddleware:
             
             # Profile.objects.filter(user=request.user) \
             #          .update(last_activity=now)
-            if last_activity < (now - datetime.timedelta(seconds = settings.USER_ONLINE_TIMEOUT)):
+            if last_activity and last_activity < (now - datetime.timedelta(seconds = settings.USER_ONLINE_TIMEOUT)):
                 cache.set(f'seen_{current_user.username}', now, timeout=settings.USER_LASTSEEN_TIMEOUT)
                 # 
         

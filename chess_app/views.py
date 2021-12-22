@@ -6,6 +6,22 @@ from django.contrib import messages
 from .forms import GameCreationForm
 from .models import Game
 # Create your views here.
+from rest_framework import serializers, viewsets
+from rest_framework import permissions
+
+from .models import Game
+from .serializers import GameSerializer
+
+
+
+class GameViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
 
 def home(request):
     return render(request, 'home.html')
@@ -39,9 +55,22 @@ def create_game(request):
 @login_required
 def game(request,match_id ):
     game = Game.objects.get(pk=match_id )
+    # if request.method == 'POST':
+    #     ...
+    #     if game.openGame and request.user != game.creator:
+    #         ...
+    #         print(request.user)
+    #         game.opponent = request.user
+    #         if game.white:
+    #             game.black = request.user
+    #         else:
+    #             game.white = request.user
+        
     context = {
         'game': game
     }
+    #TODO create LOGIC SO A UNIQUE USER JOINS THE GAME, AND ALL OTHER USERS WHO VIST AFTER NOW JUST SPECTATE THE GAME, SPECTATE IS SECONDAYR
+    
     return render(request, 'chess/board.html', context)
 
 

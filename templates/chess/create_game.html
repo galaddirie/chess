@@ -4,13 +4,13 @@
 {% block content %}
 <main>
     <section>
-        <div class="container mt-4 p-4">
-            <h1> CREATE</h1>
+        <div class="container d-flex flex-column align-items-center mt-4 p-4">
+            <h1> CREATE GAME</h1>
             <div class="card p-4" style="width: 500px; margin-top: 100px;">
                 <form method="POST" >
                     {%csrf_token%}
                     <fieldset class="form-group">
-                        <legend class="border-bottom mb-4 pb-4"> Sign Up</legend>
+                        
                         {{form | crispy}}
                     </fieldset>
                     <div class="form-gorup">
