@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags%}
+{% block content %}
+<main>
+    <section>
+        <div class="container mt-4 p-4">
+            <h1> CREATE</h1>
+            <div class="card p-4" style="width: 500px; margin-top: 100px;">
+                <form method="POST" >
+                    {%csrf_token%}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4 pb-4"> Sign Up</legend>
+                        {{form | crispy}}
+                    </fieldset>
+                    <div class="form-gorup">
+                        <button type="submit" class="btn btn-outline-dark">Create Game</button>
+                    </div>
+                </form>
+                <div class="border-top mt-3 pt-3">
+                    
+
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+</main>
+{% endblock content %}

@@ -1,10 +1,47 @@
+from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm
-# Create your views here.
+
+from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.dispatch import receiver    
+from rest_framework import serializers, viewsets
+from rest_framework import permissions
+from rest_framework.response import Response
+
+from django.contrib.auth.models import User
+from .models import Profile
+from .serializers import UserSerializer, ProfileSerializer
+
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    # def retrieve(self, request, pk=None):
+    #     try:
+    #         user = User.objects.all().get(pk=pk)
+    #         serializer = UserSerializer(user)
+    #     except User.DoesNotExist:
+    #         return HttpResponse(status=404) 
+    #     return Response(serializer.data)
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows Profiles to be viewed or edited.
+    """
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
 def register(request):
     if request.method == 'POST':
@@ -26,3 +63,4 @@ def register(request):
 @login_required
 def profile(request):
     return render(request, 'users/profile.html')
+

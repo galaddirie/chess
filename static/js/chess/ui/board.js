@@ -61,7 +61,7 @@ export class Board{
                 
                 const square = this.table.querySelector('#'+id)
                 console.log(square)
-                square.appendChild(pieceImg)
+                //square.appendChild(pieceImg)
             }
         }
     }
