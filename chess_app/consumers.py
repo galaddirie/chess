@@ -42,9 +42,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         
         event = response.get("event", None)
         message = response.get("message", None)
+        print(message)
         if event == 'MOVE':
             # Send message to room group
-            print(message)
+            
             await self.channel_layer.group_send(self.game_group_name, {
                 'type': 'send_game_data',
                 'content': message,
@@ -53,7 +54,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             })
 
         if event == 'START':
-            
+            # TODO from api get game, send fen
             await self.channel_layer.group_send(self.game_group_name, {
                 'type': 'send_game_data',
                 'content': message,
