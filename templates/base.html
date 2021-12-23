@@ -22,7 +22,7 @@
     <meta property="og:url" content="https://www.sitepoint.com/a-basic-html5-template/">
     <meta property="og:description" content="A simple HTML5 Template for new projects.">
     <meta property="og:image" content="image.png"> -->
-    <link rel="icon" href="{% static '' %}">
+    <link rel="icon" href="{% static 'images/placeholder.ico' %}">
 </head>
 
 
@@ -84,7 +84,8 @@
   
   {% if '/game/' in request.path%}
   
-  <script src="{% static '/vendor/AbChess/AbChess-0.3.1.js'%}" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha512-xRllwz2gdZciIB+AkEbeq+gVhX8VB8XsfqeFbUh+SzHlN96dEduwtTuVuc2u9EROlmW9+yhRlxjif66ORpsgVA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
   <script src="{% static '/js/chess/app.js'%}" type="module"></script>
   {% endif %}
 </body>
