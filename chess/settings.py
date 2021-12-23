@@ -183,8 +183,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
 CHANNEL_LAYERS = {
- "default": {
- "BACKEND": "asgiref.inmemory.ChannelLayer",
- "ROUTING": "channels_obstruction.routing.channel_routing",
- },
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": ['redis://h:g2de9haK0Q6W1ZVh9JZBpDeVIdGE7XW4@redis-18422.c8.us-east-1-2.ec2.cloud.redislabs.com:18422'],
+        },
+    },
 }

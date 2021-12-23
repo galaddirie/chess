@@ -26,13 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     
-    # def retrieve(self, request, pk=None):
-    #     try:
-    #         user = User.objects.all().get(pk=pk)
-    #         serializer = UserSerializer(user)
-    #     except User.DoesNotExist:
-    #         return HttpResponse(status=404) 
-    #     return Response(serializer.data)
+   
 
 class ProfileViewSet(viewsets.ModelViewSet):
     """

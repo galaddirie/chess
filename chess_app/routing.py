@@ -8,10 +8,11 @@ from django.urls import path
 from chess_app import consumers
 # routes defined for channel calls
 # this is similar to the Django urls, but specifically for Channels
+
 # channel_routing = [
-#     route_class(consumers.LobbyConsumer,  path=r"^/lobby/"),
+#     route_class(consumers.LobbyConsumer,  path=r"^/game/<uuid:match_id>"),
 # ]
 
 ws_urlpatterns = [
-    #path('ws/some_url', LobbyConsumer.as_asgi())
+    path("game/<uuid:match_id>/", consumers.GameConsumer.as_asgi())
 ]

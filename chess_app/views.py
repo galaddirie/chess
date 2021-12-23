@@ -52,7 +52,7 @@ def create_game(request):
     context = {'form':form, 'url': url}
     return render(request, 'chess/create_game.html',context)
     
-@login_required
+
 def game(request,match_id ):
     game = Game.objects.get(pk=match_id )
     # if request.method == 'POST':

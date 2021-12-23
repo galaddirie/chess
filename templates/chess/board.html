@@ -2,8 +2,13 @@
 {% load static %}
 {% block content %}
 
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" integrity="sha512-TU/clvRaSqKB43MX6dvJPEWV8tEGDTbmT4mdxTs6DSYsBY9zKmiw4Qeykp0nS10ndH14HRNG2VWN+IjiMfA17Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <section id="game">
     <h1>CHESS {{game.match_id}}</h1>
+    {{game.match_id | json_script:"game-id"}}
+    <div id="myBoard" style="width: 30vw"></div>
+    <script>
+        var static_images = "{% static 'images/chess/' %}"
+    </script>
 </section>
 {% endblock content %}
