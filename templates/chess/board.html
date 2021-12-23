@@ -2,13 +2,24 @@
 {% load static %}
 {% block content %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" integrity="sha512-TU/clvRaSqKB43MX6dvJPEWV8tEGDTbmT4mdxTs6DSYsBY9zKmiw4Qeykp0nS10ndH14HRNG2VWN+IjiMfA17Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="{%static 'css/chessboard.css'%}">
 <section id="game">
     <h1>CHESS {{game.match_id}}</h1>
     {{game.match_id | json_script:"game-id"}}
-    <div id="myBoard" style="width: 30vw"></div>
-    <script>
-        var static_images = "{% static 'images/chess/' %}"
-    </script>
+    <div class="container row">
+    <div id="myBoard" class="col-lg-8 col-12" ></div>
+    <div class="col-lg-4 col-12">
+        <label>Status:</label>
+        <div id="status"></div>
+        <label>FEN:</label>
+        <div id="fen"></div>
+        <label>PGN:</label>
+        <div id="pgn"></div>
+    </div>
+    
+    <!-- <div id="PGN" class="col-4" style="height: 100px; border: 2PX solid black;"> -->
+
+    </div>
+    </div>
 </section>
 {% endblock content %}

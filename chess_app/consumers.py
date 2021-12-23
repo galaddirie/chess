@@ -22,7 +22,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
-        await self.send(json.dumps({'value': 'first'}))
+        
         
 
     async def disconnect(self, close_code):
@@ -44,6 +44,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         message = response.get("message", None)
         if event == 'MOVE':
             # Send message to room group
+            print(message)
             await self.channel_layer.group_send(self.game_group_name, {
                 'type': 'send_game_data',
                 'content': message,
