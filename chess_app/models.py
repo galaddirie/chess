@@ -2,29 +2,29 @@ import uuid
 from django import urls
 from django.db import models
 from django.contrib.auth.models import User
+from users.models import Profile
 import json
 from datetime import datetime
 #from channels import Group
-from django.db.models.base import Model
 
 # Create your models here.
-
 
 
 class Game(models.Model):
     ...
     #players
     match_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    creator = models.ForeignKey(User, related_name='creator', on_delete=models.CASCADE)
-    opponent = models.ForeignKey(User, related_name='opponent', on_delete=models.CASCADE, null=True, blank=True)
+    creator = models.ForeignKey(Profile, blank=True, null=True, related_name='creator', on_delete=models.CASCADE)
+    
+    opponent = models.ForeignKey(Profile, related_name='opponent', on_delete=models.CASCADE, null=True, blank=True)
     openGame = models.BooleanField(default=True)
     #game_data
-    white = models.ForeignKey(User, related_name='white', on_delete=models.CASCADE, null=True, blank=True)
-    black = models.ForeignKey(User, related_name='black', on_delete=models.CASCADE, null=True, blank=True)
+    white = models.ForeignKey(Profile, related_name='white', on_delete=models.CASCADE, null=True, blank=True)
+    black = models.ForeignKey(Profile, related_name='black', on_delete=models.CASCADE, null=True, blank=True)
     fen = models.CharField(max_length=90, blank=True) #current fen 
     pgn = models.TextField(blank=True)
     move_by = models.TimeField(null=True, blank=True)
-    winner = models.ForeignKey(User, related_name='winner', on_delete=models.CASCADE, null=True, blank=True)
+    winner = models.ForeignKey(Profile, related_name='winner', on_delete=models.CASCADE, null=True, blank=True)
 
     # # dates
     completed = models.DateTimeField(null=True, blank=True)

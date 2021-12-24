@@ -8,12 +8,15 @@ from chess import settings
 # Create your models here.
 
 class Profile(models.Model):
-    user = models .OneToOneField(User,on_delete=models.CASCADE)
-    image = models.ImageField(default='default.png', upload_to='profile_pics')
+    user = models .OneToOneField(User, null=True, on_delete=models.CASCADE)
+    image = models.ImageField(default='default.png', null=True, upload_to='profile_pics')
     created = models.DateTimeField(auto_now_add=True, null=True)
     last_activity = models.DateTimeField(auto_now_add=True)
+    session_id = models.CharField(max_length=32, null=True, blank=True)
     def __str__(self) -> str:
-        return f'{self.user.username} Profile'
+        if self.user:
+            return f'{self.user.username} Profile'
+        return  f'Anonymous@{self.session_id} Profile'
 
     def last_seen(self):
         result = cache.get(f'seen_{self.user.username}')

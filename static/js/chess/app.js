@@ -2,10 +2,32 @@ import imageConfig from './config/images.js'
 import {INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE} from './../../vendor/cm-chessboard/src/cm-chessboard/Chessboard.js'
 
 
+
 var matchId = JSON.parse(document.getElementById('game-id').textContent);
 var socket = new WebSocket('ws://'+ window.location.host + '/game/' + matchId + '/')
-const chess = new Chess()
-const board = new Chessboard(document.getElementById("chessboard"),{
+// var chess = new Chess()
+// var board = new Chessboard(document.getElementById("chessboard"),{
+//     position: "start", // set as fen, "start" or "empty"
+//     orientation: COLOR.white, // white on bottom
+//     style: {
+//         cssClass: "default",
+//         showCoordinates: true, // show ranks and files
+//         borderType: BORDER_TYPE.thin, // thin: thin border, frame: wide border with coordinates in it, none: no border
+//         aspectRatio: 1, // height/width. Set to `undefined`, if you want to define it only in the css.
+//         moveFromMarker: MARKER_TYPE.frame, // the marker used to mark the start square
+//         moveToMarker: MARKER_TYPE.frame // the marker used to mark the square where the figure is moving to
+//     },
+//     responsive: true, // resizes the board based on element size
+//     animationDuration: 10, // pieces animation duration in milliseconds
+//     sprite: {
+//         url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
+//         size: 40, // the sprite size, defaults to 40x40px
+//         cache: true // cache the sprite inline, in the HTML
+//     }
+
+// })
+var chess = new Chess()
+var board = new Chessboard(document.getElementById("chessboard"),{
     position: "start", // set as fen, "start" or "empty"
     orientation: COLOR.white, // white on bottom
     style: {
@@ -17,7 +39,7 @@ const board = new Chessboard(document.getElementById("chessboard"),{
         moveToMarker: MARKER_TYPE.frame // the marker used to mark the square where the figure is moving to
     },
     responsive: true, // resizes the board based on element size
-    animationDuration: 300, // pieces animation duration in milliseconds
+    animationDuration: 10, // pieces animation duration in milliseconds
     sprite: {
         url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
         size: 40, // the sprite size, defaults to 40x40px
@@ -37,32 +59,16 @@ function inputHandler(event) {
         }
         return moves.length > 0
     } else if (event.type === INPUT_EVENT_TYPE.moveDone) {
-        const move = {from: event.squareFrom, to: event.squareTo}
+        const move = {from: event.squareFrom, to: event.squareTo, promotion:'q'}
         const result = chess.move(move)
         if (result) {
             event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
-            event.chessboard.disableMoveInput()
-            event.chessboard.setPosition(chess.fen())
+            //event.chessboard.disableMoveInput()
+            //event.chessboard.setPosition(chess.fen())
             socket.send(JSON.stringify({
                 "event": "MOVE",
                 "message": {'fen':chess.fen()}
-            }
-
-            ))
-            const possibleMoves = chess.moves({verbose: true})
-            if (possibleMoves.length > 0) {
-                const randomIndex = Math.floor(Math.random() * possibleMoves.length)
-                const randomMove = possibleMoves[randomIndex]
-                setTimeout(() => { // smoother with 500ms delay
-                    chess.move({from: randomMove.from, to: randomMove.to})
-                    event.chessboard.enableMoveInput(inputHandler, COLOR.white)
-                    event.chessboard.setPosition(chess.fen())
-                    socket.send(JSON.stringify({
-                        "event": "MOVE",
-                        "message": {'fen':chess.fen()}
-                    }))
-                }, 500)
-            }
+            }))     
         } else {
             console.warn("invalid move", move)
         }
@@ -70,8 +76,12 @@ function inputHandler(event) {
     }
 }
 
-board.enableMoveInput(inputHandler, COLOR.white)
-
+//TODO WE NEED TO HANDLE setOrientation , enableMoveInput(inputHandler, COLOR), AND USER AUTHENTICATION WHEN MAKING MOVES,
+// WE ALSO NEED A TIMER MODULE THAT WORKS IN TANDEM I.E WE WILL START TIMER FOR THE OTHER PLAYER ON RECIVING OF MOVE EVENT ,  
+// IF THE PLAYER DOESNT HAVE AN ACCOUNT WE MIGHT NEED TO USE SESSION ID TO VALIDATE WHO IS MAKING THE MOVES, AND FOR ANYONE ELSE
+// WHO LOADS INTO THE PAGE WE disableMoveInput()
+// WE ALSO MUST ONLY START THE GAME WHEN TWO PLAYERS ARE CONNECTED
+//board.enableMoveInput(inputHandler)//, COLOR['white'])
 
 
 
@@ -88,7 +98,7 @@ var $pgn = $('#pgn')
 function connect() {
     socket.onopen = function open() {
         console.log('WebSockets connection created.');
-        // on websocket open, send the START event.
+        
         socket.send(JSON.stringify({
             "event": "START",
             "message": {'fen':''}
@@ -110,21 +120,30 @@ function connect() {
         data = data["payload"];
         let message = data['content'];
         let event = data["event"];
-        console.log(message)
+        //console.log(message)
         switch (event) {
             case "START":
+                //initilize board with socket data i.e is it an open game, what is the state if the game etc
                 
+                // if fen == ' then setPosition 'start' else setPosition(fen)
+                chess.load('')
+                fen = chess.fen()
+                board.setPosition(fen)
+                
+                
+                // determine here if the user can move pieces and if they can what pieces they are allowed to move
+                board.enableMoveInput(inputHandler)//, COLOR['white']) 
                 break;
 
             case "END":
                 alert(message);
-                
                 break;
             case "MOVE":
                 //movesCount +=1
+                
                 chess.load(message['fen'])
                 board.setPosition(message['fen'])
-                
+                console.log(board.getPosition())
                 break;
             default:
                 console.log("No event")
@@ -136,17 +155,9 @@ function connect() {
     }
 }
 
-//call the connect function at the start.
 connect();
 
 
-// var game = document.getElementById('game')
-// var board = new Board(gameConfig)
-// game.appendChild(board.table);
-
-
-// var board2 = new Board(testGame)
-// game.appendChild(board2.table);
 
 
 

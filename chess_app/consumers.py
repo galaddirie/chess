@@ -5,6 +5,7 @@
 # from channels.auth import channel_session_user
 # from channels.generic.websocket import JsonWebsocketConsumer
 import json
+import uuid
 from random import randint
 from asyncio import sleep
 
@@ -15,12 +16,14 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         
         self.match_id = self.scope['url_route']['kwargs']['match_id']
-        print(self.scope['user'])
+        #self.scope["session"]["seed"] = uuid.uuid4
         self.game_group_name = 'game_%s' % self.match_id
         await self.channel_layer.group_add(
             self.game_group_name,
             self.channel_name
         )
+
+
         await self.accept()
         
         
@@ -42,10 +45,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         
         event = response.get("event", None)
         message = response.get("message", None)
-        print(message)
+        
         if event == 'MOVE':
             # Send message to room group
-            
+            #print(message)
             await self.channel_layer.group_send(self.game_group_name, {
                 'type': 'send_game_data',
                 'content': message,

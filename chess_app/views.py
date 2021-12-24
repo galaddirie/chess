@@ -1,3 +1,5 @@
+from django.contrib.auth.models import AnonymousUser
+from django.db.models import constraints
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -10,6 +12,7 @@ from rest_framework import serializers, viewsets
 from rest_framework import permissions
 
 from .models import Game
+from  users.models import Profile
 from .serializers import GameSerializer
 
 
@@ -26,20 +29,31 @@ class GameViewSet(viewsets.ModelViewSet):
 def home(request):
     return render(request, 'home.html')
 
-@login_required
+
 def create_game(request):
     if request.method == 'POST':
         form = GameCreationForm(request.POST)
         if form.is_valid():
             new_game = form.save(commit=False)
-            new_game.creator = request.user
-
-            print(form.cleaned_data['side'])
-            if form.cleaned_data['side'] == 'white':
-                new_game.white = request.user
+            if not request.session.session_key:
+                print('no session')
+                request.session.create()
+            print(request.session.session_key)
+            if request.user.is_authenticated:
+                player = request.user.profile
             else:
-                new_game.black = request.user
-
+                try:
+                    player = Profile.objects.get(session_id=request.session.session_key)        
+                except Profile.DoesNotExist:
+                    player = Profile(session_id=request.session.session_key)
+                    print(player, request.session.session_key)
+                player.save()
+               
+            new_game.creator = player
+            if form.cleaned_data['side'] == 'white':
+                new_game.white = player
+            else:
+                new_game.black = player
             new_game.save()
             url = '/game/' + str(new_game.match_id)
             context = {
@@ -55,6 +69,7 @@ def create_game(request):
 
 def game(request,match_id ):
     game = Game.objects.get(pk=match_id )
+    #print(request.scope)
     # if request.method == 'POST':
     #     ...
     #     if game.openGame and request.user != game.creator:
@@ -74,7 +89,7 @@ def game(request,match_id ):
     return render(request, 'chess/board.html', context)
 
 
-@login_required
+
 def lobby(request):
     return render(request, 'chess/lobby.html')
 
