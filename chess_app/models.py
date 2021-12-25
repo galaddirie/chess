@@ -5,8 +5,12 @@ from django.contrib.auth.models import User
 from users.models import Profile
 import json
 from datetime import datetime
-#from channels import Group
 
+
+from asgiref.sync import async_to_sync
+from model_utils import FieldTracker
+from channels.layers import get_channel_layer
+from channels.db import database_sync_to_async
 # Create your models here.
 
 
@@ -30,7 +34,8 @@ class Game(models.Model):
     completed = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    
+    tracker = FieldTracker(fields=['fen'])
+
     def __unicode__(self):
         return 'Game #{0}'.format(self.pk)
 
@@ -67,28 +72,40 @@ class Game(models.Model):
         new_game.add_log('Game created by {0}'.format(new_game.creator.username))
 
         return new_game
+   
+    @database_sync_to_async
+    def send_game_update(self):
+        """
+        Send the updated game information and squares to the game's channel group
+        """
+        from .serializers import GameSerializer
 
-    # def send_game_update(self):
-    #     """
-    #     Send the updated game information and squares to the game's channel group
-    #     """
-    #     # imported here to avoid circular import
-    #     from .serializers import GameSerializer, GameLogSerializer
+        print('sending updates')
+        print('serialiizing data')
+        game_serilizer =  GameSerializer(self)
+        print(game_serilizer.data['fen'])
+        message = {
+            'type':'receive_json',#TODO 
+            'event': 'UPDATE',
+            'message': game_serilizer.data
+        }
+        payload = {
+            
+            'message': message
+        }
 
+        game_group = f'game_{self.match_id}'
 
-    #     # get game log
-    #     log = self.get_game_log()
-    #     log_serializer = GameLogSerializer(log, many=True)
-
-    #     game_serilizer = GameSerializer(self)
-
-    #     message = {'game': game_serilizer.data,
-    #                 'log': log_serializer.data,
-    #     }
-
-    #     game_group = 'game-{0}'.format(self.id)
-    #     Group(game_group).send({'text': json.dumps(message)})
-
+        
+        channel_layer = get_channel_layer()
+        print('sending data')
+        #print(payload)
+        async_to_sync(channel_layer.group_send)(
+            game_group,
+            message
+        )
+        
+    
     def mark_complete(self, winner):
         """
         Sets a game to completed status and records the winner
@@ -96,6 +113,10 @@ class Game(models.Model):
         self.winner = winner
         self.completed = datetime.now()
         self.save()
+
+    #@database_sync_to_async
+    
+    #async_to_sync(self.send_game_update)(self)
 
 
 class Lobby(models.Model):

@@ -14,4 +14,5 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
         fields = ['user', 'image', 'created', 'last_activity', 'session_id']
+        depth = 1
 

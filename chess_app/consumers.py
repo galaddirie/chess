@@ -1,33 +1,39 @@
-# import logging
-# #from channels import Group
-# from channels.sessions import channel_session
-# from .models import Game
-# from channels.auth import channel_session_user
-# from channels.generic.websocket import JsonWebsocketConsumer
+
 import json
+from re import S
 import uuid
 from random import randint
 from asyncio import sleep
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.db import database_sync_to_async
+from channels.layers import get_channel_layer
 
 class GameConsumer(AsyncJsonWebsocketConsumer):
     
     async def connect(self):
-        
         self.match_id = self.scope['url_route']['kwargs']['match_id']
-        #self.scope["session"]["seed"] = uuid.uuid4
+        self.game = await self.get_game(self.match_id)
+        
+        #brodcast group
         self.game_group_name = 'game_%s' % self.match_id
         await self.channel_layer.group_add(
             self.game_group_name,
             self.channel_name
         )
-
-
+        if self.scope['user'].is_authenticated:
+            self.player = f"{self.scope['user']}"
+        else:
+            self.player = f"{self.scope['session'].session_key}"
+        
+        #unique player group for messages specific to this user
+        self.player_group_name = 'player_%s' % self.player
+        await self.channel_layer.group_add(
+            self.player_group_name,
+            self.channel_name
+        )
         await self.accept()
         
-        
-
     async def disconnect(self, close_code):
             print("Disconnected")
             # Leave room group
@@ -44,25 +50,29 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         response = content
         
         event = response.get("event", None)
-        message = response.get("message", None)
-        
-        if event == 'MOVE':
-            # Send message to room group
-            #print(message)
-            await self.channel_layer.group_send(self.game_group_name, {
+        message = response.get("message", {})
+
+        if event == 'CONNECT':
+            await self.channel_layer.group_send(self.player_group_name, {
                 'type': 'send_game_data',
                 'content': message,
-                'event': 'MOVE',
-                
+                'event': 'CONNECT',
             })
 
-        if event == 'START':
-            # TODO from api get game, send fen
+        if event == 'UPDATE':
+            # NOTE this event is only called from model
             await self.channel_layer.group_send(self.game_group_name, {
                 'type': 'send_game_data',
                 'content': message,
-                'event': 'START',
-                
+                'event': 'UPDATE',  
+            })
+
+        if event == 'MOVE':
+            await self.update_fen(message['fen'])
+            await self.channel_layer.group_send(self.game_group_name, {
+                'type': 'send_game_data',
+                'content': message,
+                'event': 'MOVE',  
             })
 
         if event == 'END':
@@ -76,5 +86,16 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def send_game_data(self, content):
         """ Receive message from game group """
-        
+        #print(content)
         await self.send_json({'payload':content})
+    
+    @database_sync_to_async
+    def get_game(self, pk):
+        from .models import Game
+        return Game.objects.get(pk=pk)
+
+    @database_sync_to_async
+    def update_fen(self,fen):
+        print('UPDATING')
+        self.game.fen = fen
+        self.game.save()

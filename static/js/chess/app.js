@@ -5,27 +5,7 @@ import {INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE} from './.
 
 var matchId = JSON.parse(document.getElementById('game-id').textContent);
 var socket = new WebSocket('ws://'+ window.location.host + '/game/' + matchId + '/')
-// var chess = new Chess()
-// var board = new Chessboard(document.getElementById("chessboard"),{
-//     position: "start", // set as fen, "start" or "empty"
-//     orientation: COLOR.white, // white on bottom
-//     style: {
-//         cssClass: "default",
-//         showCoordinates: true, // show ranks and files
-//         borderType: BORDER_TYPE.thin, // thin: thin border, frame: wide border with coordinates in it, none: no border
-//         aspectRatio: 1, // height/width. Set to `undefined`, if you want to define it only in the css.
-//         moveFromMarker: MARKER_TYPE.frame, // the marker used to mark the start square
-//         moveToMarker: MARKER_TYPE.frame // the marker used to mark the square where the figure is moving to
-//     },
-//     responsive: true, // resizes the board based on element size
-//     animationDuration: 10, // pieces animation duration in milliseconds
-//     sprite: {
-//         url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
-//         size: 40, // the sprite size, defaults to 40x40px
-//         cache: true // cache the sprite inline, in the HTML
-//     }
 
-// })
 var chess = new Chess()
 var board = new Chessboard(document.getElementById("chessboard"),{
     position: "start", // set as fen, "start" or "empty"
@@ -60,22 +40,38 @@ function inputHandler(event) {
         return moves.length > 0
     } else if (event.type === INPUT_EVENT_TYPE.moveDone) {
         const move = {from: event.squareFrom, to: event.squareTo, promotion:'q'}
-        const result = chess.move(move)
-        if (result) {
+        const moves = chess.moves({square: event.squareFrom, verbose:true})
+        var valid = false
+        for(let validMove in moves){
+            if (moves[validMove].to == event.squareTo){
+                valid = true
+                // 
+            }
+        }
+        if (valid){
             event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
             //event.chessboard.disableMoveInput()
             //event.chessboard.setPosition(chess.fen())
             socket.send(JSON.stringify({
                 "event": "MOVE",
-                "message": {'fen':chess.fen()}
+                "message": {'fen':chess.fen(),'move':move, 'pgn':chess.pgn()}
             }))     
         } else {
             console.warn("invalid move", move)
         }
-        return result
+        return valid
     }
 }
 
+var status = $('#status')
+var fenContainer = document.getElementById('fen')
+var pgnContainer = document.getElementById('pgn')
+
+function updateStatus(){
+    console.log(chess.pgn())
+    pgnContainer.innerHTML= chess.pgn({ max_width: 5, newline_char: '<br />' })
+    fenContainer.innerHTML = chess.fen()
+}
 //TODO WE NEED TO HANDLE setOrientation , enableMoveInput(inputHandler, COLOR), AND USER AUTHENTICATION WHEN MAKING MOVES,
 // WE ALSO NEED A TIMER MODULE THAT WORKS IN TANDEM I.E WE WILL START TIMER FOR THE OTHER PLAYER ON RECIVING OF MOVE EVENT ,  
 // IF THE PLAYER DOESNT HAVE AN ACCOUNT WE MIGHT NEED TO USE SESSION ID TO VALIDATE WHO IS MAKING THE MOVES, AND FOR ANYONE ELSE
@@ -86,31 +82,20 @@ function inputHandler(event) {
 
 
 
-console.log(socket)
 
-var status = $('#status')
-var fen = $('#fen')
-var $pgn = $('#pgn')
-
+let GameState, Player, GameBoard
+ 
 
 
 
 function connect() {
     socket.onopen = function open() {
         console.log('WebSockets connection created.');
-        
         socket.send(JSON.stringify({
-            "event": "START",
-            "message": {'fen':''}
+            "event": "CONNECT",
         }));
     };
 
-    socket.onclose = function (e) {
-        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-        setTimeout(function () {
-            connect();
-        }, 1000);
-    };
     // Sending the info about the room
     socket.onmessage = function (e) {
         // On getting the message from the server
@@ -120,36 +105,94 @@ function connect() {
         data = data["payload"];
         let message = data['content'];
         let event = data["event"];
-        //console.log(message)
+        console.log(data)
         switch (event) {
-            case "START":
-                //initilize board with socket data i.e is it an open game, what is the state if the game etc
+            case "CONNECT":
+
+                chess.load(message['fen'])
+                const boardState = chess.fen()
+                board.setPosition(boardState)
+                updateStatus()
+                ```
+                initilize chess engine and board
+                initilize GameState and player
+                defult orientation will be white
+                if game is open
+                    if player == game.creator
+                        render Waiting for player overlay
+                    render join btn
+                if game is not open
+                    if player == game.white
+                        board.enableMoveInput(inputHandler, COLOR['white'])
+                    if player == game.black
+                        board.setOrientation = 'black
+                        board.enableMoveInput(inputHandler, COLOR['black'])  
+                    else:
+                        board.disableMoveInput
+                        
+                ```
                 
-                // if fen == ' then setPosition 'start' else setPosition(fen)
-                chess.load('')
-                fen = chess.fen()
-                board.setPosition(fen)
+               
+                board.enableMoveInput(inputHandler) 
+                break;
+            case "JOIN":
+                ```
                 
-                
-                // determine here if the user can move pieces and if they can what pieces they are allowed to move
-                board.enableMoveInput(inputHandler)//, COLOR['white']) 
+                onJoin
+                    disable Join btn
+                    reset chess engine, reset boards to initial position
+                    // we will re run this following  code to make sure we initilize the board properly on the new game edge case
+                    if player == game.white
+                        board.enableMoveInput(inputHandler, COLOR['white'])
+                    if player == game.black
+                        board.setOrientation = 'black
+                        board.enableMoveInput(inputHandler, COLOR['black'])  
+                    else:
+                        board.disableMoveInput
+                    //
+
+                ```
+            case "END":
+                ```
+                alert(message);
+                display winner
+                close socket connections
+                ```
                 break;
 
-            case "END":
-                alert(message);
-                break;
             case "MOVE":
                 //movesCount +=1
-                
-                chess.load(message['fen'])
-                board.setPosition(message['fen'])
-                console.log(board.getPosition())
+                console.log('reviced move')
+                chess.move(message['move'])
+                board.setPosition(chess.fen())
+                updateStatus()
+                ```
+                set move
+                if chess.game_over
+                    if chess.in_checkmate
+                        send alert winner
+                    if chess.in_draw or chess.insufficient_material
+                        send alert draw
+                    if chess.in_stalemate
+                        send alert stalemate
+                    if chess.in_threefold_repetition()
+                        send alert threefold rep 
+                    
+                    
+                    
+                ```
                 break;
             default:
-                console.log("No event")
+                console.log(data)
         }
     };
 
+    socket.onclose = function (e) {
+        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+        setTimeout(function () {
+            connect();
+        }, 1000);
+    };
     if (socket.readyState == WebSocket.OPEN) {
         socket.onopen();
     }
