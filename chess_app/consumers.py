@@ -54,7 +54,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         if event == 'JOIN':
             await self.update_game(message['game'])
         
-        if event == 'UPDATE':
+        if event == 'UPDATED':
             ...
            
         if event == 'MOVE':
@@ -66,17 +66,16 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         
         message['game'] =  await self.serialize_game()
         if event == 'CONNECT':
-            print('CONNECT')
             self.player = await self.serialize_player(message['player'])
-            print(self.player)
             message['player'] = self.player
             #print(message['game'])
-            await self.event_response(event,message,self.game_group_name) #TODO SET group to game_group_name when connection checks are in place
+            await self.event_response_helper(event,message,self.game_group_name)    #TODO CHANGE GROUP WHEN THE BUG 
+                                                                                    # WHERE THE DATABASE IS ONE MOVE BEHIND IS FIXXED
 
         else:
-            await self.event_response(event,message,self.game_group_name)
+            await self.event_response_helper(event,message,self.game_group_name)
     
-    async def event_response(self, event, message, group):
+    async def event_response_helper(self, event, message, group):
         await self.channel_layer.group_send(group, {
                 'type': 'send_game_data',
                 'content': message,
@@ -84,7 +83,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         })
     async def send_game_data(self, content):
         """ Receive message from game group """
-        #print(content)
         await self.send_json({'payload':content})
     
     @database_sync_to_async
@@ -102,33 +100,22 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         from users.models import Profile
         from users.serializers import ProfileSerializer
         player =ProfileSerializer(Profile.objects.get(pk=pk))
-        
         return player.data
 
     @database_sync_to_async
     def update_game(self,new_game):
         from users.models import Profile
-        print(new_game)
-        print('-----------------------------------------------------')
         for attr, value in new_game.items():
-            print(attr)
             if(attr in ['creator', 'white', 'black', 'opponent']):
-                ...
-                print(type(value))
-                
                 if isinstance(value,dict):
                     pid = value['player_id']
                 else:
                     pid = value
-                
                 try:
                     profile = Profile.objects.get(pk=pid)
                     setattr(self.game, attr, profile)
                 except Profile.DoesNotExist:
                     ...
-                
             else:
                 setattr(self.game, attr, value)
-            
-
         self.game.save()

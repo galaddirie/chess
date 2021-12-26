@@ -1,33 +1,42 @@
 import imageConfig from './config/images.js'
 import {INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE} from './../../vendor/cm-chessboard/src/cm-chessboard/Chessboard.js'
 
+var matchId = JSON.parse(document.getElementById('game-id').textContent),
+    playerId = JSON.parse(document.getElementById('player-id').textContent)
+
+let GameState, 
+    Player,
+    socket = new WebSocket('ws://'+ window.location.host + '/game/' + matchId + '/')
+
+let connected = false,
+    players = [] 
+
+var status = document.getElementById('status'),
+    fenContainer = document.getElementById('fen'),
+    pgnContainer = document.getElementById('pgn')
 
 
-var matchId = JSON.parse(document.getElementById('game-id').textContent);
-var playerId = JSON.parse(document.getElementById('player-id').textContent);
-var socket = new WebSocket('ws://'+ window.location.host + '/game/' + matchId + '/')
+var chess = new Chess(),
+    board = new Chessboard(document.getElementById("chessboard"),{
+        position: "start", // set as fen, "start" or "empty"
+        orientation: COLOR.white, // white on bottom
+        style: {
+            cssClass: "default",
+            showCoordinates: true, // show ranks and files
+            borderType: BORDER_TYPE.thin, // thin: thin border, frame: wide border with coordinates in it, none: no border
+            aspectRatio: 1, // height/width. Set to `undefined`, if you want to define it only in the css.
+            moveFromMarker: MARKER_TYPE.frame, // the marker used to mark the start square
+            moveToMarker: MARKER_TYPE.frame // the marker used to mark the square where the figure is moving to
+        },
+        responsive: true, // resizes the board based on element size
+        animationDuration: 200, // pieces animation duration in milliseconds
+        sprite: {
+            url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
+            size: 40, // the sprite size, defaults to 40x40px
+            cache: true // cache the sprite inline, in the HTML
+        }
 
-var chess = new Chess()
-var board = new Chessboard(document.getElementById("chessboard"),{
-    position: "start", // set as fen, "start" or "empty"
-    orientation: COLOR.white, // white on bottom
-    style: {
-        cssClass: "default",
-        showCoordinates: true, // show ranks and files
-        borderType: BORDER_TYPE.thin, // thin: thin border, frame: wide border with coordinates in it, none: no border
-        aspectRatio: 1, // height/width. Set to `undefined`, if you want to define it only in the css.
-        moveFromMarker: MARKER_TYPE.frame, // the marker used to mark the start square
-        moveToMarker: MARKER_TYPE.frame // the marker used to mark the square where the figure is moving to
-    },
-    responsive: true, // resizes the board based on element size
-    animationDuration: 200, // pieces animation duration in milliseconds
-    sprite: {
-        url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
-        size: 40, // the sprite size, defaults to 40x40px
-        cache: true // cache the sprite inline, in the HTML
-    }
-
-})
+    })
 function inputHandler(event) {
     console.log("event", event)
     event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot)
@@ -50,12 +59,14 @@ function inputHandler(event) {
             }
         }
         if (valid){
+            // THE ISSUE IS WE ARE SENDING THE GAME STATE BEFORE THE MOVE IS MADE
+            chess.move(move)
+                //board.setPosition(chess.fen())
             GameState.pgn = chess.pgn()
             GameState.fen = chess.fen()
             event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
             socket.send(JSON.stringify({
                 "event": "MOVE",
-                
                 "message": {'game': GameState,'move':move}
             }))     
         } else {
@@ -64,16 +75,7 @@ function inputHandler(event) {
         return valid
     }
 }
-board.disableMoveInput()
-var status = $('#status')
-var fenContainer = document.getElementById('fen')
-var pgnContainer = document.getElementById('pgn')
 
-function updateStatus(){
-    console.log(chess.pgn())
-    pgnContainer.innerHTML= chess.pgn({ max_width: 5, newline_char: '<br />' })
-    fenContainer.innerHTML = chess.fen()
-}
 
 //TODO WE NEED TO HANDLE setOrientation , enableMoveInput(inputHandler, COLOR), AND USER AUTHENTICATION WHEN MAKING MOVES,
 // WE ALSO NEED A TIMER MODULE THAT WORKS IN TANDEM I.E WE WILL START TIMER FOR THE OTHER PLAYER ON RECIVING OF MOVE EVENT ,  
@@ -86,13 +88,10 @@ function updateStatus(){
 
 
 
-let GameState, 
-    Player, 
-    GameBoard
- 
-let joinBtn = document.getElementById('joinBtn'),
-playerWaiting = document.getElementById('playerWait')
 
+
+let joinBtn = document.getElementById('joinBtn'),
+    playerWaiting = document.getElementById('playerWait')
 joinBtn.addEventListener('click', joinGame)
 
 function joinGame(){
@@ -114,12 +113,15 @@ function joinGame(){
     
 }
 
+// HELPER FUNCTIONS
 function ComparePlayer(player1, player2){
     return (player1.player_id == player2.player_id)
 }
 
-let connected = false,
-    players = []
+function updateStatus(){
+    pgnContainer.innerHTML= chess.pgn({ max_width: 5, newline_char: '<br />' })
+    fenContainer.innerHTML = chess.fen()
+}
 
 function initilizeBoard(game,player){
     console.log(player)
@@ -166,9 +168,17 @@ function connect() {
         
         switch (event) {
             case "CONNECT":
-                
-                Player = message['player']
-                console.log(Player)
+                if (!Player){
+                    //NOTE 
+                    // caeful assigning user dependant variables like this 
+                    // all connected parties will have their variable over written 
+                    // since it is being broadcasted this isnt an issue 
+                    // when we send user specific data to their personal channels
+                    // but since we are notifying all parties that someone connected it is
+                    // we could consider chaining events but might get messy
+
+                    Player = message['player']
+                }
                 //players.push (Player) // we need to get active members in the grooup from server instead since this vbreaks on relod
             
                 // this will only change anything if we change connected event channel group name

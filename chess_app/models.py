@@ -83,7 +83,7 @@ class Game(models.Model):
         game_serilizer =  GameSerializer(self)
         message = {
             'type':'receive_json',
-            'event': 'UPDATE',
+            'event': 'UPDATED',
             'message': game_serilizer.data
         }
         
