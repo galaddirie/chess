@@ -4,32 +4,42 @@
 
 <link rel="stylesheet" type="text/css" href="{% static '/vendor/cm-chessboard/assets/styles/cm-chessboard.css' %}">
 <section id="game">
-    <h1>CHESS {{game.match_id}}</h1>
+    <!-- <h1>CHESS {{game.match_id}}</h1> -->
     {{game.match_id | json_script:"game-id"}}
     {{player.player_id | json_script:"player-id"}}
-    
-    <div class="container row justify-content-center">
+    <div id="openGame">
+        <button hidden id="joinBtn" class="btn  text-light btn-join">JOIN GAME</button>
+        <div hidden id="playerWait">
+            <h2>WAITING FOR PLAYER TO JOIN</h2>
+            <div class="card p-3">Share The Invite Link <a href="{{request.build_absolute_uri }}">{{request.build_absolute_uri }}</a></div>
+        </div>
         
-        <div class="col-8">
-            <div id="openGame">
-                <button hidden id="joinBtn" class="btn  text-light btn-join">JOIN GAME</button>
-                <div hidden id="playerWait">
-                    <h2>WAITING FOR PLAYER</h2>
-                    <small>invite link</small>
-                </div>
+    </div>
+    <div hidden id="gameContainer" class="container row justify-content-center">
+        
+        <div  class="col-8">
+            <div class="d-flex  flex-row mb-2 align-items-center" >
+                <div><img id="playerOppImage" class="icon me-2 border rounded" style="height:25px; width: 25px;" src="{% static 'images/default.png' %}" alt=""></div>
                 
+                <div id="playerOppName"></div>
             </div>
-            <div id="chessboard">
+            <div id="chessboard"></div>
+            <div class="d-flex mt-2 align-items-center" >
+                <div><img id="playerSelfImage" class="icon me-2 border rounded" style="height:25px; width: 25px;" src="{% static 'images/default.png' %}" alt=""></div>
                 
+                <div id="playerSelfName"></div>
             </div>
         </div>
-        <div class="col-lg-4 col-12">
-        <label>Status:</label>
-        <div id="status"></div>
-        <label>FEN:</label>
-        <div id="fen"></div>
-        <label>PGN:</label>
-        <div id="pgn"></div>
+        <div class="col-lg-4 col-12 p-1" style="margin-top: 25px;">
+            <div class="mb-4">
+                <label>Status:</label>
+                <div id="status"></div>
+            </div>
+            
+            <!-- <label>FEN:</label>
+            <div id="fen"></div> -->
+            <label>PGN:</label>
+            <div id="pgn"></div>
         </div>
     
     <!-- <div id="PGN" class="col-4" style="height: 100px; border: 2PX solid black;"> -->

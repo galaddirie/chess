@@ -69,7 +69,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.player = await self.serialize_player(message['player'])
             message['player'] = self.player
             #print(message['game'])
-            await self.event_response_helper(event,message,self.game_group_name)    #TODO CHANGE GROUP WHEN THE BUG 
+            await self.event_response_helper(event,message,self.player_group_name)    #TODO CHANGE GROUP WHEN THE BUG 
                                                                                     # WHERE THE DATABASE IS ONE MOVE BEHIND IS FIXXED
 
         else:

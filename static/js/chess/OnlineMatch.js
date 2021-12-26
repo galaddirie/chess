@@ -1,5 +1,4 @@
-import imageConfig from './config/images.js'
-import {INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE} from './../../vendor/cm-chessboard/src/cm-chessboard/Chessboard.js'
+import {INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE} from '../../vendor/cm-chessboard/src/cm-chessboard/Chessboard.js'
 
 var matchId = JSON.parse(document.getElementById('game-id').textContent),
     playerId = JSON.parse(document.getElementById('player-id').textContent)
@@ -11,9 +10,16 @@ let GameState,
 let connected = false,
     players = [] 
 
-var status = document.getElementById('status'),
-    fenContainer = document.getElementById('fen'),
+var gameContainer = document.getElementById('gameContainer'),
+    statusContainer = document.getElementById('status'),
+    //fenContainer = document.getElementById('fen'),
     pgnContainer = document.getElementById('pgn')
+
+var playerSelfName = document.getElementById('playerSelfName'),
+    playerSelfImage = document.getElementById('playerSelfImage')
+
+var playerOppName = document.getElementById('playerOppName'),
+    playerOppImage = document.getElementById('playerOppImage')
 
 
 var chess = new Chess(),
@@ -28,7 +34,8 @@ var chess = new Chess(),
             moveFromMarker: MARKER_TYPE.frame, // the marker used to mark the start square
             moveToMarker: MARKER_TYPE.frame // the marker used to mark the square where the figure is moving to
         },
-        responsive: true, // resizes the board based on element size
+        responsive: true,
+         // resizes the board based on element size
         animationDuration: 200, // pieces animation duration in milliseconds
         sprite: {
             url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
@@ -77,19 +84,6 @@ function inputHandler(event) {
 }
 
 
-//TODO WE NEED TO HANDLE setOrientation , enableMoveInput(inputHandler, COLOR), AND USER AUTHENTICATION WHEN MAKING MOVES,
-// WE ALSO NEED A TIMER MODULE THAT WORKS IN TANDEM I.E WE WILL START TIMER FOR THE OTHER PLAYER ON RECIVING OF MOVE EVENT ,  
-// IF THE PLAYER DOESNT HAVE AN ACCOUNT WE MIGHT NEED TO USE SESSION ID TO VALIDATE WHO IS MAKING THE MOVES, AND FOR ANYONE ELSE
-// WHO LOADS INTO THE PAGE WE disableMoveInput()
-// WE ALSO MUST ONLY START THE GAME WHEN TWO PLAYERS ARE CONNECTED
-//board.enableMoveInput(inputHandler)//, COLOR['white'])
-
-
-
-
-
-
-
 let joinBtn = document.getElementById('joinBtn'),
     playerWaiting = document.getElementById('playerWait')
 joinBtn.addEventListener('click', joinGame)
@@ -100,7 +94,6 @@ function joinGame(){
         GameState.opponent = playerId
 
         if (GameState.white==null){
-            
             GameState.white = playerId
         }else{
             GameState.black = playerId
@@ -119,24 +112,57 @@ function ComparePlayer(player1, player2){
 }
 
 function updateStatus(){
-    pgnContainer.innerHTML= chess.pgn({ max_width: 5, newline_char: '<br />' })
-    fenContainer.innerHTML = chess.fen()
+    pgnContainer.innerHTML= chess.pgn({ max_width: 20, newline_char: '<br />' })
+    //fenContainer.innerHTML = chess.fen()
+
+    var color = ''
+    if(chess.turn() == 'b'){
+        color = 'Black '
+    }else{
+        color = 'White '
+    }
+
+    var status = ''
+    if(chess.in_check()){
+        status = 'in check.'
+    }
+    else if (chess.in_checkmate()){
+        status = 'has Lost'
+    }
+    else{
+        status = 'to move.'
+    }
+    statusContainer.innerHTML = color + status
 }
 
+function renderPlayerDetails(player, name, image){
+    if (player.user != null){
+        name.innerHTML = player.user.username
+    }else{
+        name.innerHTML = 'Anonymous Player'
+    }
+    console.log(player.image)
+    image.src = player.image
+}
 function initilizeBoard(game,player){
     console.log(player)
     chess.load_pgn(game.pgn)
     board.setPosition(chess.fen())
     updateStatus()
-    
-    if (ComparePlayer(player, game.white)){
-        board.enableMoveInput(inputHandler, COLOR['white'])
+    if(!game.openGame){
+        if (ComparePlayer(player, game.white)){
+            board.enableMoveInput(inputHandler, COLOR['white'])
+            renderPlayerDetails(player, playerSelfName, playerSelfImage)
+            renderPlayerDetails(game.black, playerOppName, playerOppImage)
+        }
+        else if (ComparePlayer(player, game.black)){
+            board.enableMoveInput(inputHandler, COLOR['black'])
+            board.setOrientation(COLOR.black)
+            renderPlayerDetails(player, playerSelfName, playerSelfImage)
+            renderPlayerDetails(game.white, playerOppName, playerOppImage)
+
+        }
     }
-    else if (ComparePlayer(player, game.black)){
-        board.enableMoveInput(inputHandler, COLOR['black'])
-        board.setOrientation(COLOR.black)
-    }
-    
     else{
         board.disableMoveInput
     }
@@ -154,10 +180,8 @@ function connect() {
         }));
     };
 
-    // Sending the info about the room
+    
     socket.onmessage = function (e) {
-        // On getting the message from the server
-        // Do the appropriate steps on each event.
         let data = JSON.parse(e.data);
         
         data = data["payload"];
@@ -187,13 +211,14 @@ function connect() {
                 console.log(GameState)
                 if (GameState.openGame){//TODO REMOVE !
                     console.log('JOIN GAME')
+                    gameContainer.hidden = true
                     if (ComparePlayer(Player, GameState.creator)){// we will add a unique id to the profile when we send the data
                         playerWaiting.hidden = false
                     }else{
-
-                        console.log('JOIN GAME')
                         joinBtn.hidden = false
                     } 
+                }else{
+                    gameContainer.hidden = false
                 }
                 initilizeBoard(GameState, Player)
                 
@@ -203,20 +228,12 @@ function connect() {
                 break;
 
             case "JOIN":
+                gameContainer.hidden = false
                 joinBtn.hidden = true
                 playerWaiting.hidden = true
                 initilizeBoard(GameState, Player)
                 break
-
-                
-            case "END":
-                // ```
-                // alert(message);
-                // display winner
-                // close socket connections
-                // ```
-                break;
-
+  
             case "MOVE":
                 //movesCount +=1
                 console.log('reviced move')
@@ -238,16 +255,24 @@ function connect() {
                     
                 // ```
                 break;
+
+            case "END":
+                // ```
+                // alert(message);
+                // display winner
+                // close socket connections
+                // ```
+                break;
             default:
                 console.log(data)
         }
     };
 
     socket.onclose = function (e) {
-        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+        console.log('Socket is closed. Reconnect will be attempted in 5 second.', e.reason);
         setTimeout(function () {
             connect();
-        }, 1000);
+        }, 5000);
     };
     if (socket.readyState == WebSocket.OPEN) {
         socket.onopen();
