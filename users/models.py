@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.base import Model
@@ -8,7 +9,8 @@ from chess import settings
 # Create your models here.
 
 class Profile(models.Model):
-    user = models .OneToOneField(User, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
+    player_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     image = models.ImageField(default='default.png', null=True, upload_to='profile_pics')
     created = models.DateTimeField(auto_now_add=True, null=True)
     last_activity = models.DateTimeField(auto_now_add=True)
@@ -34,5 +36,6 @@ class Profile(models.Model):
         else:
             return False   
     
+
     class Meta:
         ordering = ['created']

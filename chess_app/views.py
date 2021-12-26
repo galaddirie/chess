@@ -53,8 +53,12 @@ def create_game(request):
             new_game = form.save(commit=False)
             player = create_player(request)
             new_game.creator = player
-    
-            new_game.save()
+            
+            if form.cleaned_data['side'] == 'white':
+                new_game.white = player
+            else:
+                new_game.black = player
+            new_game.save() 
             url = '/game/' + str(new_game.match_id)
             context = {
                 'url': url
@@ -70,10 +74,7 @@ def game(request,match_id ):
     game = Game.objects.get(pk=match_id )
     player = create_player(request)
     
-    # if form.cleaned_data['side'] == 'white':
-    #     game.white = player
-    # else:
-    #     game.black = player           
+             
     # NOTE this is always called when someone joins the page, before the webscoket is opened
     # WE COULD SET THE PLAYERS HERE, I.E ON POST IF GAME IS OPEN SET ENEMY TO THIS PROFILE,
     #  AND SEND THIS TO THE TEMPLATE SO WE CAN VERIFY IN JAVASCRIPT
@@ -81,9 +82,10 @@ def game(request,match_id ):
     # if request.method == 'POST':
     #     ...
 
-        
+    print()    
     context = {
-        'game': game
+        'game': game,
+        'player': player
     }
 
     #TODO create LOGIC SO A UNIQUE USER JOINS THE GAME, AND ALL OTHER USERS WHO VIST AFTER NOW JUST SPECTATE THE GAME, SPECTATE IS SECONDAYR

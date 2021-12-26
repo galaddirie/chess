@@ -8,7 +8,6 @@ from datetime import datetime
 
 
 from asgiref.sync import async_to_sync
-from model_utils import FieldTracker
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
 # Create your models here.
@@ -34,7 +33,6 @@ class Game(models.Model):
     completed = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    tracker = FieldTracker(fields=['fen'])
 
     def __unicode__(self):
         return 'Game #{0}'.format(self.pk)
@@ -83,23 +81,16 @@ class Game(models.Model):
         print('sending updates')
         print('serialiizing data')
         game_serilizer =  GameSerializer(self)
-        print(game_serilizer.data['fen'])
         message = {
-            'type':'receive_json',#TODO 
+            'type':'receive_json',
             'event': 'UPDATE',
             'message': game_serilizer.data
         }
-        payload = {
-            
-            'message': message
-        }
-
-        game_group = f'game_{self.match_id}'
-
         
+        game_group = f'game_{self.match_id}'
         channel_layer = get_channel_layer()
         print('sending data')
-        #print(payload)
+        
         async_to_sync(channel_layer.group_send)(
             game_group,
             message
@@ -114,9 +105,7 @@ class Game(models.Model):
         self.completed = datetime.now()
         self.save()
 
-    #@database_sync_to_async
-    
-    #async_to_sync(self.send_game_update)(self)
+   
 
 
 class Lobby(models.Model):

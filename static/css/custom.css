@@ -110,5 +110,17 @@ footer{
     align-items: center;
     margin: auto;
 }
+#openGame{
+    text-align: center;
+}
+.btn-join{
+    background-color: rgb(96, 214, 155);
+    font-size: 2em;
+    font-size: bolder;
+}
+
+.btn-join:hover{
+    background-color: yellowgreen;
+}
 
 

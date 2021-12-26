@@ -9,10 +9,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = ['username', 'url','profile','email', 'groups']
 
-class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Profile
-        fields = ['user', 'image', 'created', 'last_activity', 'session_id']
+        fields = '__all__'
         depth = 1
 

@@ -4,6 +4,7 @@ import {INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE} from './.
 
 
 var matchId = JSON.parse(document.getElementById('game-id').textContent);
+var playerId = JSON.parse(document.getElementById('player-id').textContent);
 var socket = new WebSocket('ws://'+ window.location.host + '/game/' + matchId + '/')
 
 var chess = new Chess()
@@ -19,7 +20,7 @@ var board = new Chessboard(document.getElementById("chessboard"),{
         moveToMarker: MARKER_TYPE.frame // the marker used to mark the square where the figure is moving to
     },
     responsive: true, // resizes the board based on element size
-    animationDuration: 10, // pieces animation duration in milliseconds
+    animationDuration: 200, // pieces animation duration in milliseconds
     sprite: {
         url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
         size: 40, // the sprite size, defaults to 40x40px
@@ -49,12 +50,13 @@ function inputHandler(event) {
             }
         }
         if (valid){
+            GameState.pgn = chess.pgn()
+            GameState.fen = chess.fen()
             event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
-            //event.chessboard.disableMoveInput()
-            //event.chessboard.setPosition(chess.fen())
             socket.send(JSON.stringify({
                 "event": "MOVE",
-                "message": {'fen':chess.fen(),'move':move, 'pgn':chess.pgn()}
+                
+                "message": {'game': GameState,'move':move}
             }))     
         } else {
             console.warn("invalid move", move)
@@ -62,7 +64,7 @@ function inputHandler(event) {
         return valid
     }
 }
-
+board.disableMoveInput()
 var status = $('#status')
 var fenContainer = document.getElementById('fen')
 var pgnContainer = document.getElementById('pgn')
@@ -72,6 +74,7 @@ function updateStatus(){
     pgnContainer.innerHTML= chess.pgn({ max_width: 5, newline_char: '<br />' })
     fenContainer.innerHTML = chess.fen()
 }
+
 //TODO WE NEED TO HANDLE setOrientation , enableMoveInput(inputHandler, COLOR), AND USER AUTHENTICATION WHEN MAKING MOVES,
 // WE ALSO NEED A TIMER MODULE THAT WORKS IN TANDEM I.E WE WILL START TIMER FOR THE OTHER PLAYER ON RECIVING OF MOVE EVENT ,  
 // IF THE PLAYER DOESNT HAVE AN ACCOUNT WE MIGHT NEED TO USE SESSION ID TO VALIDATE WHO IS MAKING THE MOVES, AND FOR ANYONE ELSE
@@ -83,16 +86,69 @@ function updateStatus(){
 
 
 
-let GameState, Player, GameBoard
+let GameState, 
+    Player, 
+    GameBoard
  
+let joinBtn = document.getElementById('joinBtn'),
+playerWaiting = document.getElementById('playerWait')
 
+joinBtn.addEventListener('click', joinGame)
 
+function joinGame(){
+    if (GameState.openGame){
+        GameState.openGame = false
+        GameState.opponent = playerId
+
+        if (GameState.white==null){
+            
+            GameState.white = playerId
+        }else{
+            GameState.black = playerId
+        }
+        socket.send(JSON.stringify({
+            "event": "JOIN",
+            "message": {"game":GameState}
+        }));
+    }
+    
+}
+
+function ComparePlayer(player1, player2){
+    return (player1.player_id == player2.player_id)
+}
+
+let connected = false,
+    players = []
+
+function initilizeBoard(game,player){
+    console.log(player)
+    chess.load_pgn(game.pgn)
+    board.setPosition(chess.fen())
+    updateStatus()
+    
+    if (ComparePlayer(player, game.white)){
+        board.enableMoveInput(inputHandler, COLOR['white'])
+    }
+    else if (ComparePlayer(player, game.black)){
+        board.enableMoveInput(inputHandler, COLOR['black'])
+        board.setOrientation(COLOR.black)
+    }
+    
+    else{
+        board.disableMoveInput
+    }
+
+}
+    
 
 function connect() {
     socket.onopen = function open() {
         console.log('WebSockets connection created.');
+        console.log(playerId)
         socket.send(JSON.stringify({
             "event": "CONNECT",
+            "message": {"player":playerId}
         }));
     };
 
@@ -105,59 +161,50 @@ function connect() {
         data = data["payload"];
         let message = data['content'];
         let event = data["event"];
-        console.log(data)
+
+        GameState = message['game']
+        
         switch (event) {
             case "CONNECT":
-
-                chess.load(message['fen'])
-                const boardState = chess.fen()
-                board.setPosition(boardState)
-                updateStatus()
-                ```
-                initilize chess engine and board
-                initilize GameState and player
-                defult orientation will be white
-                if game is open
-                    if player == game.creator
-                        render Waiting for player overlay
-                    render join btn
-                if game is not open
-                    if player == game.white
-                        board.enableMoveInput(inputHandler, COLOR['white'])
-                    if player == game.black
-                        board.setOrientation = 'black
-                        board.enableMoveInput(inputHandler, COLOR['black'])  
-                    else:
-                        board.disableMoveInput
-                        
-                ```
                 
-               
-                board.enableMoveInput(inputHandler) 
+                Player = message['player']
+                console.log(Player)
+                //players.push (Player) // we need to get active members in the grooup from server instead since this vbreaks on relod
+            
+                // this will only change anything if we change connected event channel group name
+                
+                
+                console.log(GameState)
+                if (GameState.openGame){//TODO REMOVE !
+                    console.log('JOIN GAME')
+                    if (ComparePlayer(Player, GameState.creator)){// we will add a unique id to the profile when we send the data
+                        playerWaiting.hidden = false
+                    }else{
+
+                        console.log('JOIN GAME')
+                        joinBtn.hidden = false
+                    } 
+                }
+                initilizeBoard(GameState, Player)
+                
+                connected = true
+                //remove this later
+                //board.enableMoveInput(inputHandler) 
                 break;
-            case "JOIN":
-                ```
-                
-                onJoin
-                    disable Join btn
-                    reset chess engine, reset boards to initial position
-                    // we will re run this following  code to make sure we initilize the board properly on the new game edge case
-                    if player == game.white
-                        board.enableMoveInput(inputHandler, COLOR['white'])
-                    if player == game.black
-                        board.setOrientation = 'black
-                        board.enableMoveInput(inputHandler, COLOR['black'])  
-                    else:
-                        board.disableMoveInput
-                    //
 
-                ```
+            case "JOIN":
+                joinBtn.hidden = true
+                playerWaiting.hidden = true
+                initilizeBoard(GameState, Player)
+                break
+
+                
             case "END":
-                ```
-                alert(message);
-                display winner
-                close socket connections
-                ```
+                // ```
+                // alert(message);
+                // display winner
+                // close socket connections
+                // ```
                 break;
 
             case "MOVE":
@@ -166,21 +213,20 @@ function connect() {
                 chess.move(message['move'])
                 board.setPosition(chess.fen())
                 updateStatus()
-                ```
-                set move
-                if chess.game_over
-                    if chess.in_checkmate
-                        send alert winner
-                    if chess.in_draw or chess.insufficient_material
-                        send alert draw
-                    if chess.in_stalemate
-                        send alert stalemate
-                    if chess.in_threefold_repetition()
-                        send alert threefold rep 
+                // ```
+                // set move
+                // if chess.game_over
+                //     if chess.in_checkmate
+                //         send alert winner
+                //     if chess.in_draw or chess.insufficient_material
+                //         send alert draw
+                //     if chess.in_stalemate
+                //         send alert stalemate
+                //     if chess.in_threefold_repetition()
+                //         send alert threefold rep 
                     
                     
-                    
-                ```
+                // ```
                 break;
             default:
                 console.log(data)

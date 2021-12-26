@@ -6,11 +6,22 @@
 <section id="game">
     <h1>CHESS {{game.match_id}}</h1>
     {{game.match_id | json_script:"game-id"}}
+    {{player.player_id | json_script:"player-id"}}
     
     <div class="container row justify-content-center">
         
         <div class="col-8">
-            <div id="chessboard"></div>
+            <div id="openGame">
+                <button hidden id="joinBtn" class="btn  text-light btn-join">JOIN GAME</button>
+                <div hidden id="playerWait">
+                    <h2>WAITING FOR PLAYER</h2>
+                    <small>invite link</small>
+                </div>
+                
+            </div>
+            <div id="chessboard">
+                
+            </div>
         </div>
         <div class="col-lg-4 col-12">
         <label>Status:</label>
