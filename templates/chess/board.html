@@ -7,7 +7,7 @@
     <!-- <h1>CHESS {{game.match_id}}</h1> -->
     {{game.match_id | json_script:"game-id"}}
     {{player.player_id | json_script:"player-id"}}
-    <div id="openGame">
+    <div hidden id="openGame">
         <button hidden id="joinBtn" class="btn  text-light btn-join">JOIN GAME</button>
         <div hidden id="playerWait">
             <h2>WAITING FOR PLAYER TO JOIN</h2>
@@ -15,9 +15,9 @@
         </div>
         
     </div>
-    <div hidden id="gameContainer" class="container row justify-content-center">
+    <div id="gameContainer" class="container mt-lg-2 mt-lg-4 row justify-content-center">
         
-        <div  class="col-8">
+        <div  class="col-lg-8 col-12">
             <div class="d-flex  flex-row mb-2 align-items-center" >
                 <div><img id="playerOppImage" class="icon me-2 border rounded" style="height:25px; width: 25px;" src="{% static 'images/default.png' %}" alt=""></div>
                 

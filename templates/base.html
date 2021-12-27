@@ -31,7 +31,7 @@
     
 
   <header>
-    <nav class="navbar navbar-expand-md navbar-light shadow-sm">
+    <nav class="navbar navbar-expand-md navbar-light shadow-sm mb-4">
       <div class="container-fluid d-flex">
         <div>
           <a class="navbar-brand" href="{% url 'home-page'%}">
@@ -85,7 +85,7 @@
   {% if '/game/' in request.path%}
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha512-xRllwz2gdZciIB+AkEbeq+gVhX8VB8XsfqeFbUh+SzHlN96dEduwtTuVuc2u9EROlmW9+yhRlxjif66ORpsgVA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js" integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="{% static '/js/chess/OnlineMatch.js'%}" type="module"></script>
   {% endif %}
 </body>

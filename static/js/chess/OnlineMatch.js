@@ -1,4 +1,10 @@
 import {INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE} from '../../vendor/cm-chessboard/src/cm-chessboard/Chessboard.js'
+import {AudioSpites} from './AudioSprites.js'
+
+AudioSpites.once('load', function(){
+    AudioSpites.play();
+  });
+  
 
 var matchId = JSON.parse(document.getElementById('game-id').textContent),
     playerId = JSON.parse(document.getElementById('player-id').textContent)
@@ -20,7 +26,6 @@ var playerSelfName = document.getElementById('playerSelfName'),
 
 var playerOppName = document.getElementById('playerOppName'),
     playerOppImage = document.getElementById('playerOppImage')
-
 
 var chess = new Chess(),
     board = new Chessboard(document.getElementById("chessboard"),{
@@ -44,6 +49,8 @@ var chess = new Chess(),
         }
 
     })
+
+
 function inputHandler(event) {
     console.log("event", event)
     event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot)
@@ -62,19 +69,17 @@ function inputHandler(event) {
         for(let validMove in moves){
             if (moves[validMove].to == event.squareTo){
                 valid = true
-                // 
             }
         }
         if (valid){
-            // THE ISSUE IS WE ARE SENDING THE GAME STATE BEFORE THE MOVE IS MADE
-            chess.move(move)
-                //board.setPosition(chess.fen())
+            moveHandler(move, Player, false)
             GameState.pgn = chess.pgn()
             GameState.fen = chess.fen()
             event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
+            
             socket.send(JSON.stringify({
                 "event": "MOVE",
-                "message": {'game': GameState,'move':move}
+                "message": {'game': GameState,'move':move, 'movePlayer':Player}
             }))     
         } else {
             console.warn("invalid move", move)
@@ -84,8 +89,10 @@ function inputHandler(event) {
 }
 
 
+
 let joinBtn = document.getElementById('joinBtn'),
-    playerWaiting = document.getElementById('playerWait')
+    playerWaiting = document.getElementById('playerWait'),
+    openGame = document.getElementById('openGame')
 joinBtn.addEventListener('click', joinGame)
 
 function joinGame(){
@@ -111,8 +118,37 @@ function ComparePlayer(player1, player2){
     return (player1.player_id == player2.player_id)
 }
 
+function moveHandler(move, movePlayer, server){
+    
+    if (!server || (movePlayer.player_id != playerId)){
+        chess.move(move)
+        board.setPosition(chess.fen())
+        if (chess.game_over()){
+            if (chess.in_checkmate()){
+                AudioSpites.play('game_lost')
+                
+            }
+            else if (chess.in_draw()  || chess.in_stalemate()){
+                AudioSpites.play('game_draw')
+                
+            }
+            else{
+                AudioSpites.play('game_won')
+                
+            } 
+        }
+        else if (chess.in_check()) {
+            AudioSpites.play('check')   
+        }
+        else{
+            AudioSpites.play('move')
+            
+        }
+    }
+}
+
 function updateStatus(){
-    pgnContainer.innerHTML= chess.pgn({ max_width: 20, newline_char: '<br />' })
+    pgnContainer.innerHTML= chess.pgn({ max_width: 5, newline_char: '<br />' })
     //fenContainer.innerHTML = chess.fen()
 
     var color = ''
@@ -121,13 +157,22 @@ function updateStatus(){
     }else{
         color = 'White '
     }
-
     var status = ''
-    if(chess.in_check()){
-        status = 'in check.'
+    //NOTE REPEATE CODE FROM mOVE hANDLER
+    if (chess.game_over()){
+        if (chess.in_checkmate()){    
+            status = 'has lost'
+        }
+        else if (chess.in_draw()  || chess.in_stalemate()){     
+            status = 'to drawn.'
+        }
+        else{
+            status = 'has won.'
+        } 
     }
-    else if (chess.in_checkmate()){
-        status = 'has Lost'
+    else if (chess.in_check()) {
+        
+        status = 'in check.'
     }
     else{
         status = 'to move.'
@@ -144,12 +189,15 @@ function renderPlayerDetails(player, name, image){
     console.log(player.image)
     image.src = player.image
 }
+
 function initilizeBoard(game,player){
     console.log(player)
     chess.load_pgn(game.pgn)
     board.setPosition(chess.fen())
     updateStatus()
     if(!game.openGame){
+        gameContainer.hidden = false
+        openGame.hidden = true
         if (ComparePlayer(player, game.white)){
             board.enableMoveInput(inputHandler, COLOR['white'])
             renderPlayerDetails(player, playerSelfName, playerSelfImage)
@@ -164,11 +212,19 @@ function initilizeBoard(game,player){
         }
     }
     else{
+        gameContainer.hidden = false
+        openGame.hidden = false
+        gameContainer.classList.add('inactive')
+        if (ComparePlayer(Player, GameState.creator)){// we will add a unique id to the profile when we send the data
+            playerWaiting.hidden = false
+        }else{
+            joinBtn.hidden = false
+        } 
         board.disableMoveInput
     }
 
 }
-    
+
 
 function connect() {
     socket.onopen = function open() {
@@ -180,7 +236,6 @@ function connect() {
         }));
     };
 
-    
     socket.onmessage = function (e) {
         let data = JSON.parse(e.data);
         
@@ -191,71 +246,26 @@ function connect() {
         GameState = message['game']
         
         switch (event) {
+        case "MOVE":
+            
+            moveHandler(message['move'], message['movePlayer'], true)
+            updateStatus()
+            
+            break;
+
             case "CONNECT":
                 if (!Player){
-                    //NOTE 
-                    // caeful assigning user dependant variables like this 
-                    // all connected parties will have their variable over written 
-                    // since it is being broadcasted this isnt an issue 
-                    // when we send user specific data to their personal channels
-                    // but since we are notifying all parties that someone connected it is
-                    // we could consider chaining events but might get messy
-
+                    // NOT WORKING RIGHT
                     Player = message['player']
                 }
-                //players.push (Player) // we need to get active members in the grooup from server instead since this vbreaks on relod
-            
-                // this will only change anything if we change connected event channel group name
-                
-                
-                console.log(GameState)
-                if (GameState.openGame){//TODO REMOVE !
-                    console.log('JOIN GAME')
-                    gameContainer.hidden = true
-                    if (ComparePlayer(Player, GameState.creator)){// we will add a unique id to the profile when we send the data
-                        playerWaiting.hidden = false
-                    }else{
-                        joinBtn.hidden = false
-                    } 
-                }else{
-                    gameContainer.hidden = false
-                }
                 initilizeBoard(GameState, Player)
-                
                 connected = true
-                //remove this later
-                //board.enableMoveInput(inputHandler) 
                 break;
 
             case "JOIN":
-                gameContainer.hidden = false
-                joinBtn.hidden = true
-                playerWaiting.hidden = true
                 initilizeBoard(GameState, Player)
                 break
   
-            case "MOVE":
-                //movesCount +=1
-                console.log('reviced move')
-                chess.move(message['move'])
-                board.setPosition(chess.fen())
-                updateStatus()
-                // ```
-                // set move
-                // if chess.game_over
-                //     if chess.in_checkmate
-                //         send alert winner
-                //     if chess.in_draw or chess.insufficient_material
-                //         send alert draw
-                //     if chess.in_stalemate
-                //         send alert stalemate
-                //     if chess.in_threefold_repetition()
-                //         send alert threefold rep 
-                    
-                    
-                // ```
-                break;
-
             case "END":
                 // ```
                 // alert(message);
