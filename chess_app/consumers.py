@@ -4,7 +4,7 @@ from re import S
 import uuid
 from random import randint
 from asyncio import sleep
-
+import datetime
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
@@ -58,20 +58,22 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             ...
            
         if event == 'MOVE':
-            await self.update_game(message['game'])
+            if message['game']['completed'] :
+                message['game']['completed'] = datetime.datetime.now().__str__()
+            await self.update_game(message['game'])    
             
-        if event == 'END':
-            # Send message to room group
-            ...
+        message['game'] =  await self.serialize_game()    
         
+        if event == 'END':
+            ...
+            
         message['game'] =  await self.serialize_game()
         if event == 'CONNECT':
             self.player = await self.serialize_player(message['player'])
             message['player'] = self.player
             #print(message['game'])
-            await self.event_response_helper(event,message,self.player_group_name)    #TODO CHANGE GROUP WHEN THE BUG 
-                                                                                    # WHERE THE DATABASE IS ONE MOVE BEHIND IS FIXXED
-
+            await self.event_response_helper(event,message,self.player_group_name)
+        
         else:
             await self.event_response_helper(event,message,self.game_group_name)
     
@@ -104,9 +106,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def update_game(self,new_game):
+
         from users.models import Profile
         for attr, value in new_game.items():
-            if(attr in ['creator', 'white', 'black', 'opponent']):
+            if(attr in ['creator', 'white', 'black', 'opponent', 'winner']):
                 if isinstance(value,dict):
                     pid = value['player_id']
                 else:
@@ -119,3 +122,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             else:
                 setattr(self.game, attr, value)
         self.game.save()
+
+
+        # if message['game']['winner']:
+            #     await self.channel_layer.group_send(self.game_group_name, {
+            #         'type': 'receive_json',
+            #         'content': message,
+            #         'event': 'END',
+            #     })
