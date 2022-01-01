@@ -105,6 +105,45 @@ footer{
 
 /*PROFILE PAGE*/
 
+.match-history{
+    border: 1px solid #D8D8D8;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.match-history-header{
+    background-color: #F7F7F7;
+    border-bottom: 1px solid #D8D8D8;
+    
+}
+
+.match-history-body{
+
+
+}
+.match{
+    display: flex;
+    border: 1px solid #D8D8D8;
+    border-radius: 6px;
+}
+
+@media screen and (max-width:1024px){
+    
+}
+
+@media screen and (max-width:780px){
+    .match-length{
+        display: none;
+    }    
+}
+
+@media screen and (max-width:450px){
+    .match-date{
+        display: none;
+    }    
+}
+
+
 
 /*CHESS BOARD*/
 #game{
@@ -116,14 +155,13 @@ footer{
 
 }
 .gameContainer{
-    
+    height: fit-content;
 
 }
 .chess-container{
     min-width: 30vw;
 }
 .status-container{
-    float: left;
     margin-left: 20px;
     margin-top: 30px;
     height: 100%;
@@ -139,7 +177,7 @@ footer{
 #openGame{
     text-align: center;
     position: absolute;
-    top: 15vw;
+    top: 10vw;
     padding: 20px;
     max-width: 1000px;
     display: flex;
@@ -152,20 +190,7 @@ footer{
 }
 
 
-#openGame{
-    text-align: center;
-    position: absolute;
-    top: 15vw;
-    padding: 20px;
-    max-width: 1000px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: white;
-    border-radius: 10px;
-    border: 2px solid lightgrey;
-    box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.082);
-}
+
 
 @media screen and (max-width:1024px){
     
@@ -175,7 +200,7 @@ footer{
     
 }
 
-@media screen and (max-width:768px){
+@media screen and (max-width:780px){
     #game{
         flex-direction: column;
         left: 0px;  
@@ -195,6 +220,7 @@ footer{
         width: 90vw;
     }
 }
+
 @media screen and (max-width:450px){
     
     #game{

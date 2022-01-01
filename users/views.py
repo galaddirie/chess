@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver    
@@ -14,6 +14,7 @@ from rest_framework.response import Response
 
 from django.contrib.auth.models import User
 from .models import Profile
+from chess_app.models import Game
 from .serializers import UserSerializer, ProfileSerializer
 
 
@@ -37,6 +38,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -56,5 +58,45 @@ def register(request):
 
 @login_required
 def profile(request):
-    return render(request, 'users/profile.html')
+    profile = Profile.objects.get(user = request.user)
+    #live_games = Game.get_live(profile)
+    match_history = Game.get_completed(profile)
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, f'Your Profile Was Updated!')
+            return redirect('profile')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+    context = {
+        'user_form': user_form,
+        'profile_form':profile_form,
+        'player': profile,
+        'match_history': match_history
+    }
+    return render(request, 'users/profile.html',context)
 
+
+
+def player_search(request):
+    if request.method =='GET':
+        username = request.GET['username']
+        santaized_name = username.lower()
+        santaized_name = ''.join(santaized_name.split())
+        profile = Profile.objects.get(sanitized_name = santaized_name)
+        
+        match_history = Game.get_completed(profile)
+        
+        context = {
+            'player': profile,
+            'match_history': match_history
+        }    
+        return render(request, 'users/profile.html',context)
+        
+
+def public_profile(request, player_id):
+    ...

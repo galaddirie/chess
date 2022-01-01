@@ -16,17 +16,15 @@
                         <a href="{% url 'register'%}"><button class="btn btn-lg btn-outline-dark">Sign Up</button></a>
                         <a href="{% url 'login'%}"><button type="button" class="btn btn-lg btn-outline-dark">Login</button></a>  
                       </div>
-                    <button class="btn btn-md btn-purple">Log in With Twitch <i class="bi bi-twitch"></i></button>
-                    <a href="{% url 'create-game-page' %}"><button class="btn btn-lg btn-outline-dark">Create Game</button></a>
+                    <!-- <button class="btn btn-md btn-purple">Log in With Twitch <i class="bi bi-twitch"></i></button> -->
+                    <a href="{% url 'create-game-page' %}"><button style="width: 100%;" class="btn btn-lg btn-outline-dark">Create Game</button></a>
                     {%endif%}
                 </div>
                 <div class="hero-right">
                     <img src="{% static 'images/logo.svg' %}" alt="Logo">
-                    
                 </div>
             </div>
-        </div>
-        
+        </div> 
     </div>
 </main>
 

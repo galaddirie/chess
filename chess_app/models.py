@@ -4,7 +4,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from users.models import Profile
 import json
-from datetime import datetime
+from datetime import datetime,timezone
+import pytz
+import humanize 
 
 
 from asgiref.sync import async_to_sync
@@ -12,16 +14,17 @@ from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
 # Create your models here.
 
+from django.db.models import Q
 
 class Game(models.Model):
     ...
-    #players
+    # players
     match_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     creator = models.ForeignKey(Profile, blank=True, null=True, related_name='creator', on_delete=models.CASCADE)
     
     opponent = models.ForeignKey(Profile, related_name='opponent', on_delete=models.CASCADE, null=True, blank=True)
     openGame = models.BooleanField(default=True)
-    #game_data
+    # game_data
     white = models.ForeignKey(Profile, related_name='white', on_delete=models.CASCADE, null=True, blank=True)
     black = models.ForeignKey(Profile, related_name='black', on_delete=models.CASCADE, null=True, blank=True)
     fen = models.CharField(max_length=90, blank=True) #current fen 
@@ -29,7 +32,7 @@ class Game(models.Model):
     move_by = models.TimeField(null=True, blank=True)
     winner = models.ForeignKey(Profile, related_name='winner', on_delete=models.CASCADE, null=True, blank=True)
 
-    # # dates
+    # dates
     completed = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -38,12 +41,20 @@ class Game(models.Model):
         return 'Game #{0}'.format(self.pk)
 
     @staticmethod
-    def get_available_games():
+    def get_all_live():
         return Game.objects.filter(openGame=True, completed=None)
 
     @staticmethod
     def created_count(user):
         return Game.objects.filter(creator=user).count()
+
+    @staticmethod
+    def get_completed(user):
+        return Game.objects.filter(Q(creator=user) | Q(opponent=user), completed__isnull = False)
+
+    @staticmethod
+    def get_live(user):
+        return Game.objects.filter(Q(creator=user) | Q(opponent=user), completed=None)
 
     @staticmethod
     def get_by_id(id):
@@ -71,31 +82,13 @@ class Game(models.Model):
 
         return new_game
    
-    @database_sync_to_async
-    def send_game_update(self):
-        """
-        Send the updated game information and squares to the game's channel group
-        """
-        from .serializers import GameSerializer
+    def get_length(self):
+        td =  self.completed - self.created
+        return humanize.naturaldelta(td)
 
-        print('sending updates')
-        print('serialiizing data')
-        game_serilizer =  GameSerializer(self)
-        message = {
-            'type':'receive_json',
-            'event': 'UPDATED',
-            'message': game_serilizer.data
-        }
-        
-        game_group = f'game_{self.match_id}'
-        channel_layer = get_channel_layer()
-        print('sending data')
-        
-        async_to_sync(channel_layer.group_send)(
-            game_group,
-            message
-        )
-        
+    def time_since(self):
+        td = datetime.now(timezone.utc)-self.completed
+        return humanize.naturaltime(td)
     
     def mark_complete(self, winner):
         """

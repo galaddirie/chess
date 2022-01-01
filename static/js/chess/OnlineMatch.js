@@ -50,7 +50,8 @@ var chess = new Chess(),
 
     })
 
-
+// code snippet from cm-chessboard example
+// https://shaack.com/projekte/cm-chessboard/examples/validate-moves.html
 function inputHandler(event) {
     event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot)
     event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
@@ -79,14 +80,10 @@ function inputHandler(event) {
             socket.send(JSON.stringify({
                 "event": "MOVE",
                 "message": {'game': GameState,'move':move, 'movePlayer':Player}
-            }))
-
-            // socket.send(JSON.stringify({
-            //     "event": "END",
-            //     "message": {'game': GameState,'move':move, 'movePlayer':Player}
-            // }))     
+            }))  
         } else {
             console.warn("invalid move", move)
+            AudioSpites.play('take_back')
         }
         return valid
     }
@@ -180,9 +177,6 @@ function moveHandler(move, movePlayer, server){
 
 var winModal = new bootstrap.Modal(document.getElementById('winPopup')),
     modalText = document.getElementById('winPopupText')
-
-
-
 
 function updateStatus(){
     pgnContainer.innerHTML= chess.pgn({ max_width: 5, newline_char: '<br />' })
@@ -341,3 +335,4 @@ connect();
 
 
 
+export {inputHandler}

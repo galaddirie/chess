@@ -1,4 +1,4 @@
-
+from typing import Dict
 import json
 from re import S
 import uuid
@@ -110,15 +110,17 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         from users.models import Profile
         for attr, value in new_game.items():
             if(attr in ['creator', 'white', 'black', 'opponent', 'winner']):
+                # in Onlinematch.js when a player joins the game we initlize the game, 
+                # the profile attributes(opponent,white,black,etc), are initlized with just a player_id after that 
+                # any profile atributes will contain a serilized object containing player data
+                
                 if isinstance(value,dict):
                     pid = value['player_id']
                 else:
                     pid = value
-                try:
+                if value is not None:
                     profile = Profile.objects.get(pk=pid)
-                    setattr(self.game, attr, profile)
-                except Profile.DoesNotExist:
-                    ...
+                    setattr(self.game, attr, profile)     
             else:
                 setattr(self.game, attr, value)
         self.game.save()

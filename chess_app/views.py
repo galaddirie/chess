@@ -30,9 +30,12 @@ def home(request):
     return render(request, 'home.html')
 
 
-def create_player(request):
+def create_player_helper(request):
+    """
+    Returns a Player Profile, if the user is not authenticted we generate 
+    a temporary profile for them based on their session id
+    """
     if not request.session.session_key:
-        print('no session')
         request.session.create()
     print(request.session.session_key)
     if request.user.is_authenticated:
@@ -47,11 +50,14 @@ def create_player(request):
     return player
 
 def create_game(request):
+    """
+    Game Creation Form, redirects users to the generated game page
+    """
     if request.method == 'POST':
         form = GameCreationForm(request.POST)
         if form.is_valid():
             new_game = form.save(commit=False)
-            player = create_player(request)
+            player = create_player_helper(request)
             new_game.creator = player
             
             if form.cleaned_data['side'] == 'white':
@@ -63,36 +69,22 @@ def create_game(request):
             context = {
                 'url': url
             }
-            return redirect('game-page', match_id=new_game.match_id)
+            return redirect('online-game-page', match_id=new_game.match_id)
+            
     else:
         url = None
         form = GameCreationForm()
     context = {'form':form, 'url': url}
     return render(request, 'chess/create_game.html',context)
     
-def game(request,match_id ):
+def online_game(request,match_id ):
     game = Game.objects.get(pk=match_id )
-    player = create_player(request)
-    
-             
-    # NOTE this is always called when someone joins the page, before the webscoket is opened
-    # WE COULD SET THE PLAYERS HERE, I.E ON POST IF GAME IS OPEN SET ENEMY TO THIS PROFILE,
-    #  AND SEND THIS TO THE TEMPLATE SO WE CAN VERIFY IN JAVASCRIPT
-    # SECURITY FLAW WOULD BE IF PLAYER COULD CHANGE THE SESSION DATA IF WE STORE IT IN THE HTML 
-    # if request.method == 'POST':
-    #     ...
-
-    print()    
+    player = create_player_helper(request)
     context = {
         'game': game,
         'player': player
     }
-
-    #TODO create LOGIC SO A UNIQUE USER JOINS THE GAME, AND ALL OTHER USERS WHO VIST AFTER NOW JUST SPECTATE THE GAME, SPECTATE IS SECONDAYR
-    
     return render(request, 'chess/board.html', context)
-
-
 
 def lobby(request):
     return render(request, 'chess/lobby.html')
