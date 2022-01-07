@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load tz %}
 {% load crispy_forms_tags%}
+{% load static%}
 {% block content %}
 
 <main class="">
-    <div class="container mt-4 d-flex justify-content-center" style="overflow: hidden;">
-        <div class="p-3 d-flex  justify-content-between" style="width: 100%;">
-            <div class="d-flex ms-2 row align-items-center ">
+    <div class="container mt-4 d-flex justify-content-center" >
+        <div class="p-3 d-flex row justify-content-md-between justify-content-center" style="width: 100%;">
+            <div class="d-flex row align-items-center col-md-9 col-12">
                 <div class="d-flex mx-md-0 mx-auto col-md-2 col-12 image  p-0 " style="border-radius: 100%; overflow: hidden; width: 150px; height: 150px;"> 
                     <img src="{{player.image.url}}"> 
                 </div>
@@ -38,25 +39,13 @@
                 
                 
             </div>
-            <div>
+            {%if request.path == '/profile/'%}
+            <div class="col-md-1 col-12 d-flex justify-content-center mt-md-0 mt-3" style="height: fit-content;">
                 <button class="btn btn-lg btn-outline-dark" onclick="updateProfile()">Update</button>
             </div>
+            {%endif%}
         </div>
-        <div hidden id="update-form" class="">
-            <div class="card p-4" style="width: 500px;">
-                <form method="POST" enctype="multipart/form-data">
-                    {%csrf_token%}
-                    <fieldset class="form-group">
-                        <legend class="border-bottom mb-4 pb-4"> Update Profile</legend>
-                        {{user_form | crispy}}
-                        {{profile_form | crispy}}
-                    </fieldset>
-                    <div class="form-gorup">
-                        <button type="submit" class="btn btn-outline-dark">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        
     </div>
     
     
@@ -163,5 +152,39 @@
     </section>
 </main>
 
+<div class="modal fade" id="updateProfilePopup" tabindex="-1" aria-labelledby="updateProfilePopupLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="updateProfilePopupLabel">Update</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div id="updateProfilePopupText" class="modal-body">
+            <div id="update-form" class="">
+                <div class="card p-4" >
+                    <form method="POST" enctype="multipart/form-data">
+                        {%csrf_token%}
+                        <fieldset class="form-group">
+                            
+                            {{user_form | crispy}}
+                            {{profile_form | crispy}}
+                        </fieldset>
+                        <div class="form-gorup">
+                            <button type="submit" class="btn btn-outline-dark">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    </div>
+</div>
 
 {% endblock content %}
+
+{% block scripts %}
+    
+    <script src="{% static '/js/profile.js'%}"></script>
+
+{% endblock scripts %}

@@ -145,19 +145,19 @@ function moveHandler(move, movePlayer, server){
                 if (chess.turn() =='b' ){
                     determineWin('black')
                     GameState.winner = GameState.white
-                    modalText.innerHTML = 'White had Won';
+                    modalText.innerHTML = 'White s Won';
                     
                 }    
                 else{
                     determineWin('white')
                     GameState.winner = GameState.black
-                    modalText.innerHTML = 'Black had Won';
+                    modalText.innerHTML = 'Black has Won';
                 }
                 
             }
             else if (chess.in_draw()  || chess.in_stalemate()){
                 AudioSpites.play('game_draw')
-                modalText.innerHTML = 'Draw had Won';
+                modalText.innerHTML = 'Draw!';
                 
             }
             winModal.show()
@@ -196,7 +196,7 @@ function updateStatus(){
             status = 'has lost'
         }
         else if (chess.in_draw()  || chess.in_stalemate()){     
-            status = 'to drawn.'
+            status = 'has drawn.'
         }
         else{
             status = 'has won.'

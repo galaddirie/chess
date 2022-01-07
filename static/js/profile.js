@@ -1,5 +1,7 @@
-updateForm = document.getElementById('update-form')
+var updateModal = new bootstrap.Modal(document.getElementById('updateProfilePopup')),
+    modalText = document.getElementById('updateProfilePopupText')
 
 function updateProfile(){
-    updateForm.hidden = !updateForm.hidden
+    updateModal.show()
 }
+

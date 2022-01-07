@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
-{% block content %}
 
+{% block content %}
 <link rel="stylesheet" type="text/css" href="{% static '/vendor/cm-chessboard/assets/styles/cm-chessboard.css' %}">
 <section id="game">
     <!-- <h1>CHESS {{game.match_id}}</h1> -->
@@ -85,5 +85,10 @@
     </div>
   
 </section>
-
 {% endblock content %}
+
+{% block scripts%}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha512-xRllwz2gdZciIB+AkEbeq+gVhX8VB8XsfqeFbUh+SzHlN96dEduwtTuVuc2u9EROlmW9+yhRlxjif66ORpsgVA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js" integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{% static '/js/chess/OnlineMatch.js'%}" type="module"></script>
+{%endblock scripts%}
