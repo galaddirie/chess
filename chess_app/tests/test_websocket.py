@@ -21,27 +21,18 @@ TEST_CHANNEL_LAYERS = {
 
 @database_sync_to_async
 def create_game():
-    """
-    Returns a serilized game with the given primary key(pk)
-    """
     game = Game.objects.create()
     return game
 
 
 @database_sync_to_async
 def get_game(pk):
-    """
-    Returns a serilized game with the given primary key(pk)
-    """
     game = Game.objects.get(pk=pk)
     return game
 
 
 @database_sync_to_async
 def create_player():
-    """
-    Returns a serilized game with the given primary key(pk)
-    """
     player = Profile.objects.create(session_id='anon_user')
     return player
 
