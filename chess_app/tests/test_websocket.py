@@ -1,12 +1,9 @@
-from channels import sessions
 from chess.asgi import application
 from django.test import TransactionTestCase
 
-import pytest
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
-from django.contrib.auth import get_user_model
 from chess.settings import CHANNEL_LAYERS
 from chess_app.models import Game
 from users.models import Profile

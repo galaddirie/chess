@@ -1,9 +1,6 @@
-from PIL.Image import Image
 from django.test import TestCase
-from unittest import mock
 from users.models import Profile
 from django.contrib.auth.models import User
-from datetime import datetime, timedelta, timezone
 
 
 class UserTestCase(TestCase):

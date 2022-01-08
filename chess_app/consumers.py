@@ -8,7 +8,6 @@ if TYPE_CHECKING:
 import datetime
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from channels.layers import get_channel_layer
 
 
 class GameConsumer(AsyncJsonWebsocketConsumer):

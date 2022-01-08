@@ -5,11 +5,6 @@ if TYPE_CHECKING:
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.base import Model
-from django.core.cache import cache
-import datetime
-import pytz
-from chess import settings
 from PIL import Image
 # Create your models here.
 

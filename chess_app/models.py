@@ -1,23 +1,17 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
-from django.db.models.query import QuerySet
 if TYPE_CHECKING:
     from .models import Game
+    from django.db.models.query import QuerySet
 
 import uuid
 from django.db import models
-from django.contrib.auth.models import User
 from users.models import Profile
 
 from datetime import datetime, timezone
-import pytz
 import humanize
 
-
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-from channels.db import database_sync_to_async
 # Create your models here.
 
 from django.db.models import Q
