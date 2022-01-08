@@ -37,7 +37,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         self.match_id = self.scope['url_route']['kwargs']['match_id']
         self.game = await self.get_game(self.match_id)
         self.player = None
-        self.game_group_name = 'game_%s' % self.match_id
+        self.game_group_name = f'game_{self.match_id}'
+        await self.channel_layer.group_add(
+            'test_group',
+            self.channel_name
+        )
+
         await self.channel_layer.group_add(
             self.game_group_name,
             self.channel_name
@@ -67,6 +72,9 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.channel_name
         )
 
+    async def echo_message(self, content):
+        await self.send_json(content)
+
     async def receive_json(self, content: Dict) -> None:
         """
         Receive message from WebSocket.
@@ -75,9 +83,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         response = content
         event = response.get("event", None)
         message = response.get("message", {})
-
+        if event == 'ECHO':
+            await self.send_json(content)
         if event == 'JOIN':
+            print('JOIN')
             await self.update_game(message['game'])
+            message['game'] = await self.serialize_game()
 
         if event == 'UPDATED':
             ...
@@ -86,17 +97,15 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             if message['game']['completed']:
                 message['game']['completed'] = datetime.datetime.now().__str__()
             await self.update_game(message['game'])
-
-        message['game'] = await self.serialize_game()
+            message['game'] = await self.serialize_game()
 
         if event == 'END':
             ...
 
-        message['game'] = await self.serialize_game()
         if event == 'CONNECT':
             self.player = await self.serialize_player(message['player'])
             message['player'] = self.player
-            # print(message['game'])
+            message['game'] = await self.serialize_game()
             await self.event_response(event, message, self.player_group_name)
 
         else:
@@ -108,7 +117,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         """
         await self.channel_layer.group_send(group, {
             'type': 'send_game_data',
-            'content': message,
+            'message': message,
             'event': event,
         })
 
@@ -116,7 +125,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         """ 
         Receive message from game group 
         """
-        await self.send_json({'payload': content})
+        await self.send_json(content)
 
     @database_sync_to_async
     def get_game(self, pk: Union[UUID, str]) -> Game:

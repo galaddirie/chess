@@ -24,7 +24,8 @@ class Profile(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
     last_activity = models.DateTimeField(auto_now=True)
     session_id = models.CharField(max_length=32, null=True, blank=True)
-    sanitized_name = models.CharField(max_length=150, null=True, blank=True)
+    sanitized_name = models.CharField(
+        max_length=150, null=True, blank=True, editable=False)
 
     def __str__(self) -> str:
         if self.user:
@@ -40,22 +41,27 @@ class Profile(models.Model):
         profile = Profile.objects.get(sanitized_name=name)
         return profile
 
-    def save(self, *args, **kwargs):
-        # super().save()
-        # img = Image.open(self.image.path)
+    def is_auth_user(self):
+        return self.user != None
 
-        # if img.height > 300 or img.width > 300:
-        #     output_size = (300, 300)
-        #     img.thumbnail(output_size)
-        #     img.save(self.image.path)
+    def save(self, *args, **kwargs):
+        super(Profile, self).save(*args, **kwargs)
+        img = Image.open(self.image.path)
+
+        if img.height > 300 or img.width > 300:
+            output_size = (300, 300)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
         if not self.sanitized_name:
             try:
                 name = self.user.username.lower()
                 name = ''.join(name.split())
                 self.sanitized_name = name
             except AttributeError:
-                self.sanitized_name = self.session_id
-            super(Profile, self).save(*args, **kwargs)
+                name = self.session_id.lower()
+                name = ''.join(name.split())
+                self.sanitized_name = name
+        super().save()
 
     class Meta:
         ordering = ['created']

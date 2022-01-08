@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from .models import Game
 
 import uuid
-from django import urls
 from django.db import models
 from django.contrib.auth.models import User
 from users.models import Profile

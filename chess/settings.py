@@ -35,7 +35,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'chess_app',
-    'users', 
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     'rest_framework',
-    
-    #'channels'
+
+    # 'channels'
 ]
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -58,17 +58,17 @@ REST_FRAMEWORK = {
 }
 
 CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(BASE_DIR, 'filebased-cache'),
-            'MAX_ENTRIES': 10000,              
-        }
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'filebased-cache'),
+        'MAX_ENTRIES': 10000,
+    }
 }
 
 # Number of seconds of inactivity before a user is marked offline
 USER_ONLINE_TIMEOUT = 300
 
-# Number of seconds that we will keep track of inactive users for before 
+# Number of seconds that we will keep track of inactive users for before
 # their last seen is removed from the cache
 USER_LASTSEEN_TIMEOUT = 60 * 60 * 24 * 7
 
@@ -166,21 +166,21 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-LOGIN_REDIRECT_URL ='home-page'
+LOGIN_REDIRECT_URL = 'home-page'
 
-LOGIN_URL ='login'
+LOGIN_URL = 'login'
 
 LANGUAGE_CODE = 'en-us'
- 
+
 TIME_ZONE = 'America/New_York'
- 
+
 USE_I18N = True
- 
+
 USE_L10N = True
- 
+
 USE_TZ = True
 
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 CHANNEL_LAYERS = {
