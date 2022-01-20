@@ -46,6 +46,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.game_group_name,
             self.channel_name
         )
+
         if self.scope['user'].is_authenticated:
             pid = f"{self.scope['user']}"
         else:
@@ -93,22 +94,33 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             ...
 
         if event == 'MOVE':
-            if message['game']['completed']:
-                message['game']['completed'] = datetime.datetime.now().__str__()
-            await self.update_game(message['game'])
+            # game is updated once, all players recive the a serialized version
+            # and update their game in the client, self.game will be out of sync
+            # in other player instances until they make an update tehmselves, any new connections(or reconnections),
+            # will recive the most updated version when they request the game from the database
+            if message['gameUpdates']['completed']:
+                message['gameUpdates']['completed'] = datetime.datetime.now().__str__()
+            await self.update_game(message['gameUpdates'])
             message['game'] = await self.serialize_game()
 
         if event == 'END':
             ...
 
         if event == 'CONNECT':
+            # We send two messages, one contain
             self.player = await self.serialize_player(message['player'])
             message['player'] = self.player
-            message['game'] = await self.serialize_game()
-            await self.event_response(event, message, self.player_group_name)
+            # we send a message containg the game data to the player only,
+            # but we send player data to everyone on connect, we are sending
+            # player data to the one connecting twice as a consequence
+            # this is worse for cases of  all users when num_of_users <= 2  and
+            # this will always be worse for the connecting user
+            message_copy = message.copy()
+            message_copy['game'] = await self.serialize_game()
 
-        else:
-            await self.event_response(event, message, self.game_group_name)
+            await self.event_response(
+                event, message_copy, self.player_group_name)
+        await self.event_response(event, message, self.game_group_name)
 
     async def event_response(self, event: str, message: Dict, group: str) -> None:
         """
@@ -164,7 +176,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 # the game attr with a profile type are initlized with just
                 # a player_id, after that any profile atributes will contain a
                 # serilized object containing player data
-
                 if isinstance(value, dict):
                     pid = value['player_id']
                 else:

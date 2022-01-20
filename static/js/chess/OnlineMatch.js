@@ -18,7 +18,6 @@ let connected = false,
 
 var gameContainer = document.getElementById('gameContainer'),
     statusContainer = document.getElementById('status'),
-    //fenContainer = document.getElementById('fen'),
     pgnContainer = document.getElementById('pgn')
 
 var playerSelfName = document.getElementById('playerSelfName'),
@@ -79,7 +78,15 @@ function inputHandler(event) {
 
             socket.send(JSON.stringify({
                 "event": "MOVE",
-                "message": { 'game': GameState, 'move': move, 'movePlayer': Player }
+                "message": {
+                    'gameUpdates': {
+                        'fen': GameState.fen,
+                        'pgn': GameState.pgn,
+                        'completed': GameState.completed,
+                        'winner': GameState.winner,
+                    },
+                    'move': move, 'movePlayer': Player
+                }
             }))
         } else {
             console.warn("invalid move", move)
@@ -190,10 +197,14 @@ function updateStatus() {
     }
 
     var status = ''
-    //NOTE REPEATE CODE FROM mOVE hANDLER
+    //NOTE REPEATED CODE FROM MOVELL hANDLER
     if (chess.game_over()) {
         if (chess.in_checkmate()) {
+            // if player.color == chess.color
             status = 'has lost'
+            // else
+            //    color = player.color opposite 
+            //    status has won
         }
         else if (chess.in_draw() || chess.in_stalemate()) {
             status = 'has drawn.'
@@ -223,25 +234,23 @@ function renderPlayerDetails(player, name, image) {
 
 function initilizeBoard(game, player) {
     chess.load_pgn(game.pgn)
-
+    console.log('TEST')
     updateStatus()
     if (!game.openGame) {
         gameContainer.hidden = false
         openGame.hidden = true
         if (ComparePlayer(player, game.white)) {
             board.enableMoveInput(inputHandler, COLOR['white'])
-            renderPlayerDetails(player, playerSelfName, playerSelfImage)
-            renderPlayerDetails(game.black, playerOppName, playerOppImage)
         }
-        else if (ComparePlayer(player, game.black)) {
+        if (ComparePlayer(player, game.black)) {
             board.enableMoveInput(inputHandler, COLOR['black'])
-
             renderPlayerDetails(player, playerSelfName, playerSelfImage)
             renderPlayerDetails(game.white, playerOppName, playerOppImage)
-
             board.setOrientation(COLOR.black)
+        } else {
 
-
+            renderPlayerDetails(game.white, playerSelfName, playerSelfImage)
+            renderPlayerDetails(game.black, playerOppName, playerOppImage)
         }
     }
     else {
@@ -277,8 +286,14 @@ function connect() {
 
         let message = data['message'];
         let event = data["event"];
-
-        GameState = message['game']
+        console.log(data)
+        if (message['gameUpdates']) {
+            for (const [key, value] of Object.entries(message['gameUpdates']))
+                GameState[key] = value
+        }
+        if (message['game']) {
+            GameState = message['game']
+        }
 
         switch (event) {
             case "MOVE":
@@ -292,11 +307,13 @@ function connect() {
                 break;
 
             case "CONNECT":
+                console.log(message['player']['player_id'], 'connected')
                 if (!Player) {
-                    // NOT WORKING RIGHT
                     Player = message['player']
                 }
-                initilizeBoard(GameState, Player)
+                if (!connected) {
+                    initilizeBoard(GameState, Player)
+                }
                 connected = true
                 break;
 
@@ -305,11 +322,8 @@ function connect() {
                 break
 
             case "END":
-
-
                 // display winner
                 // close socket connections
-                // ```
                 break;
             default:
             //
@@ -322,6 +336,7 @@ function connect() {
             connect();
         }, 5000);
     };
+
     if (socket.readyState == WebSocket.OPEN) {
         socket.onopen();
     }

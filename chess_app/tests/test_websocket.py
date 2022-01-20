@@ -104,7 +104,7 @@ class GameWebSocketTestCase(TransactionTestCase):
 
         message = {
             'event': 'MOVE',
-            'message': {'game': {'fen': 'test_string', 'completed': None}}
+            'message': {'gameUpdates': {'fen': 'test_string', 'completed': None}}
         }
         channel_layer = get_channel_layer()
         await communicator.send_json_to(message)
