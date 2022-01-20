@@ -152,7 +152,7 @@ function moveHandler(move, movePlayer, server) {
                 if (chess.turn() == 'b') {
                     determineWin('black')
                     GameState.winner = GameState.white
-                    modalText.innerHTML = 'White s Won';
+                    modalText.innerHTML = 'White has Won';
 
                 }
                 else {

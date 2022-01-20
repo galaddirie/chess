@@ -62,7 +62,6 @@ db.sqlite3
 db.sqlite3-journal
 filebased-cache/
 media/
-static/js/chess/OnlineMatchRefactor.js
 # Flask stuff:
 instance/
 .webassets-cache
