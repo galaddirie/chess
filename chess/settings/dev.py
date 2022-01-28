@@ -1,6 +1,6 @@
 from .base import *
 
-SECRET_KEY = 'django-insecure-q2_(obwdl5tci50+1md$uxp_l5_q(3pt1ui!8hu@-fm8mm=7-@'
+SECRET_KEY = '123456789'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
