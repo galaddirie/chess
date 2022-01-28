@@ -4,12 +4,15 @@
 {% load static%}
 {% block content %}
 
-<main class="">
+<main id="profile" class="">
     <div class="container mt-4 d-flex justify-content-center" >
         <div class="p-3 d-flex row justify-content-md-between justify-content-center" style="width: 100%;">
             <div class="d-flex row align-items-center col-md-9 col-12">
-                <div class="d-flex mx-md-0 mx-auto col-md-2 col-12 image  p-0 " style="border-radius: 100%; overflow: hidden; width: 150px; height: 150px;"> 
-                    <img src="{{player.image.url}}"> 
+                <div class="d-flex mx-md-0 mx-auto col-md-2 col-12 p-0 profile-header-img"> 
+                    
+                        <img src="{{player.image.url}}"> 
+                    
+                    
                 </div>
                 <div class=" text-lg-start text-center col-md-2 col-12" >
                     <div>
@@ -185,6 +188,6 @@
 
 {% block scripts %}
     
-    <script src="{% static '/js/profile.js'%}"></script>
+    <script src="{% static 'js/profile.js'%}"></script>
 
 {% endblock scripts %}

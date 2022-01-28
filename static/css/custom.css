@@ -104,6 +104,22 @@ footer{
 }
 
 /*PROFILE PAGE*/
+.profile-header-img{
+    width: 150px;
+    height: 150px;
+    overflow: hidden;
+    border:2px solid black;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    
+    
+}
+.profile-header-img img{
+    min-width: 100%;
+    
+    
+}
 
 .match-history{
     border: 1px solid #D8D8D8;
@@ -238,7 +254,6 @@ footer{
 .btn-join:hover{
     background-color: yellowgreen;
 }
-
 
 #pgn::-webkit-scrollbar {
     -webkit-appearance: none;
