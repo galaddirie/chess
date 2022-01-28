@@ -78,8 +78,12 @@ def player_search(request):
         username = request.GET['username']
         santaized_name = username.lower()
         santaized_name = ''.join(santaized_name.split())
-        profile = Profile.objects.get(sanitized_name=santaized_name)
-
+        if username == '':
+            return render(request, 'users/player_page_empty.html')
+        try:
+            profile = Profile.objects.get(sanitized_name=santaized_name)
+        except Profile.DoesNotExist:
+            return render(request, 'users/player_page_dne.html', {'username': username})
         match_history = Game.get_completed(profile)
 
         context = {
