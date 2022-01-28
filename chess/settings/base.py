@@ -172,7 +172,6 @@ USE_TZ = True
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = [
-    'chess-stream.herokuapp.com',
     'https://*.chess-stream.herokuapp.com',
     'https://chess-stream.herokuapp.com/*',
     'https://chess-stream.herokuapp.com',
