@@ -11,7 +11,7 @@ var matchId = JSON.parse(document.getElementById('game-id').textContent),
 
 let GameState,
     Player,
-    socket = new WebSocket('ws://' + window.location.host + '/game/' + matchId + '/')
+    socket = new WebSocket('wss://' + window.location.host + '/game/' + matchId + '/')
 
 let connected = false,
     players = []
