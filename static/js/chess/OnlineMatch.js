@@ -9,9 +9,10 @@ AudioSpites.once('load', function () {
 var matchId = JSON.parse(document.getElementById('game-id').textContent),
     playerId = JSON.parse(document.getElementById('player-id').textContent)
 
+const protocol = (window.location.protocol === 'https:' ? 'wss' : 'ws') + '://'
 let GameState,
     Player,
-    socket = new WebSocket('wss://' + window.location.host + '/game/' + matchId + '/')
+    socket = new WebSocket(protocol + window.location.host + '/game/' + matchId + '/')
 
 let connected = false,
     players = []
