@@ -4,7 +4,7 @@ from django.test import TransactionTestCase
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
-from chess.settings import CHANNEL_LAYERS
+from chess.settings.dev import CHANNEL_LAYERS
 from chess_app.models import Game
 from users.models import Profile
 
