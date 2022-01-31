@@ -291,7 +291,7 @@ function connect() {
             for (const [key, value] of Object.entries(message['gameUpdates']))
                 GameState[key] = value
         }
-        if (message['game']) {
+        else if (message['game']) {
             GameState = message['game']
         }
 

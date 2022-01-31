@@ -104,7 +104,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             if message['gameUpdates']['completed']:
                 message['gameUpdates']['completed'] = datetime.datetime.now().__str__()
             await self.update_game(message['gameUpdates'])
-            message['game'] = await self.serialize_game()
+            # message['game'] = await self.serialize_game()
 
         if event == 'END':
             ...
