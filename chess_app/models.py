@@ -45,6 +45,9 @@ class Game(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ('-completed',)
+
     def __unicode__(self) -> str:
         return 'Game #{0}'.format(self.pk)
 
