@@ -177,7 +177,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://chess-stream.herokuapp.com',
 ]
 
-# TODO hide password from url
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
