@@ -90,8 +90,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.update_game(message['game'])
             message['game'] = await self.serialize_game()
 
-        if event == 'UPDATED':
-            ...
+        if event == 'UPDATE':
+            # is it faster to modify the instance and save vs query, the issue with modifying the model
+            # instance is that we will be savinging the game again and since the update meathod is
+            # called by every user who is in the group after a join event
+            self.game = await self.get_game(self.match_id)
 
         if event == 'MOVE':
             # game is updated once, all players recive the a serialized version
@@ -117,7 +120,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             # this will always be worse for the connecting user
             message_copy = message.copy()
             message_copy['game'] = await self.serialize_game()
-
             await self.event_response(
                 event, message_copy, self.player_group_name)
         await self.event_response(event, message, self.game_group_name)
@@ -136,6 +138,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         """ 
         Receive message from game group 
         """
+        print(self.player_group_name)
         await self.send_json(content)
 
     @database_sync_to_async

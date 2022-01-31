@@ -73,6 +73,7 @@ function inputHandler(event) {
         }
         if (valid) {
             event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
+
             moveHandler(move, Player, false)
 
 
@@ -116,7 +117,7 @@ function joinGame() {
         }
         socket.send(JSON.stringify({
             "event": "JOIN",
-            "message": { "game": GameState }
+            "message": { "game": GameState, "sender": playerId }
         }));
     }
 
@@ -235,7 +236,6 @@ function renderPlayerDetails(player, name, image) {
 
 function initilizeBoard(game, player) {
     chess.load_pgn(game.pgn)
-    console.log('TEST')
     updateStatus()
     if (!game.openGame) {
         gameContainer.hidden = false
@@ -287,7 +287,6 @@ function connect() {
 
         let message = data['message'];
         let event = data["event"];
-        console.log(data)
         if (message['gameUpdates']) {
             for (const [key, value] of Object.entries(message['gameUpdates']))
                 GameState[key] = value
@@ -304,7 +303,6 @@ function connect() {
                 if (GameState.completed != null) {
                     socket.onclose()
                 }
-
                 break;
 
             case "CONNECT":
@@ -319,7 +317,13 @@ function connect() {
                 break;
 
             case "JOIN":
+                GameState = message['game']
                 initilizeBoard(GameState, Player)
+                if (message["sender"] != playerId) {
+                    socket.send(JSON.stringify({
+                        "event": 'UPDATE'
+                    }));
+                }
                 break
 
             case "END":
