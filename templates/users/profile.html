@@ -82,6 +82,8 @@
                                 <div class="fw-bold">
                                 {% if match.winner == player%}
                                     WON
+                                {% else if match.winner == None%}
+                                    DRAW
                                 {%else%}
                                     LOST
                                 {%endif%}
