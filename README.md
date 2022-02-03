@@ -19,8 +19,8 @@ To install this repository on your machine
     ```
  6. Populate environment variables
  7. make migrations 
-   ```
-     $ python manage.py makemigrations 
-     $ python manage.py migrate
-   ```
+    ```
+    $ python manage.py makemigrations 
+    $ python manage.py migrate
+    ```
   8. Run the application: `$ python manage.py runserver`
