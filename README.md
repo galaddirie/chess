@@ -4,7 +4,7 @@ A real-time multiplayer chess game web application built with Django and Django 
 
 ![image](https://user-images.githubusercontent.com/70884733/152384690-2f179f4b-128c-460e-a8e2-b16828948d6f.png)
 
-## How to install Repo
+## How to Install Repo
 
 To install this repository on your machine
 1. Clone this repository: `$ git clone https://github.com/galaddirie/chess.git` 
