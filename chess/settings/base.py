@@ -107,7 +107,7 @@ WSGI_APPLICATION = 'chess.wsgi.application'
 load_dotenv(find_dotenv())
 
 DATABASES = {
-    'default': dj_database_url.config(default='sqlite:///db.sqlite3', conn_max_age=600)
+    'default': dj_database_url.config(default='postgres://postgres@db/postgres', conn_max_age=600)
 
 }
 
@@ -181,7 +181,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+            "hosts": [os.environ.get('REDIS_URL')],
         },
     },
 }
