@@ -15,7 +15,7 @@ from channels.auth import AuthMiddlewareStack
 from chess_app.routing import ws_urlpatterns
 from chess_app.consumers import GameConsumer
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chess.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chess.settings.dev')
 
 
 application = ProtocolTypeRouter({

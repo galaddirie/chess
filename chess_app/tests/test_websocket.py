@@ -4,7 +4,7 @@ from django.test import TransactionTestCase
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
-from chess.settings import CHANNEL_LAYERS
+from chess.settings.dev import CHANNEL_LAYERS
 from chess_app.models import Game
 from users.models import Profile
 
@@ -113,11 +113,25 @@ class GameWebSocketTestCase(TransactionTestCase):
         assert updated_game.fen == 'test_string'
         await communicator.disconnect()
 
+    def test_join_game(self):
+        ...
+
+    def test_two_consumers_have_same_data(self):
+        ...
+
+    def test_two_consumers_have_same_data_after_client_changes(self):
+        ...
     # TODO force sign user in test case so we can
-    # test player based events insde recive_json, for now
-    # We can assume that if test_can_send_json_and_recive_json,
-    # test_can_brodcast_message works, and tets_update_game works
-    # that the events inside recive json work
+    # test client based events insde recive_json
+
+    async def test_join_game(self):
+        ...
+
+    async def test_two_consumers_have_same_data(self):
+        ...
+
+    async def test_two_consumers_have_same_data_after_client_changes(self):
+        ...
 
     # async def test_can_connect_to_game(self):
     #     self.game = await create_game()

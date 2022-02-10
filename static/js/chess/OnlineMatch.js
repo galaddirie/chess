@@ -9,9 +9,10 @@ AudioSpites.once('load', function () {
 var matchId = JSON.parse(document.getElementById('game-id').textContent),
     playerId = JSON.parse(document.getElementById('player-id').textContent)
 
+const protocol = (window.location.protocol === 'https:' ? 'wss' : 'ws') + '://'
 let GameState,
     Player,
-    socket = new WebSocket('ws://' + window.location.host + '/game/' + matchId + '/')
+    socket = new WebSocket(protocol + window.location.host + '/game/' + matchId + '/')
 
 let connected = false,
     players = []
@@ -72,6 +73,7 @@ function inputHandler(event) {
         }
         if (valid) {
             event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
+
             moveHandler(move, Player, false)
 
 
@@ -115,7 +117,7 @@ function joinGame() {
         }
         socket.send(JSON.stringify({
             "event": "JOIN",
-            "message": { "game": GameState }
+            "message": { "game": GameState, "sender": playerId }
         }));
     }
 
@@ -234,7 +236,6 @@ function renderPlayerDetails(player, name, image) {
 
 function initilizeBoard(game, player) {
     chess.load_pgn(game.pgn)
-    console.log('TEST')
     updateStatus()
     if (!game.openGame) {
         gameContainer.hidden = false
@@ -286,12 +287,11 @@ function connect() {
 
         let message = data['message'];
         let event = data["event"];
-        console.log(data)
         if (message['gameUpdates']) {
             for (const [key, value] of Object.entries(message['gameUpdates']))
                 GameState[key] = value
         }
-        if (message['game']) {
+        else if (message['game']) {
             GameState = message['game']
         }
 
@@ -303,7 +303,6 @@ function connect() {
                 if (GameState.completed != null) {
                     socket.onclose()
                 }
-
                 break;
 
             case "CONNECT":
@@ -318,7 +317,13 @@ function connect() {
                 break;
 
             case "JOIN":
+                GameState = message['game']
                 initilizeBoard(GameState, Player)
+                if (message["sender"] != playerId) {
+                    socket.send(JSON.stringify({
+                        "event": 'UPDATE'
+                    }));
+                }
                 break
 
             case "END":

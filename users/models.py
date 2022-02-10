@@ -20,7 +20,7 @@ class Profile(models.Model):
     last_activity = models.DateTimeField(auto_now=True)
     session_id = models.CharField(max_length=32, null=True, blank=True)
     sanitized_name = models.CharField(
-        max_length=150, null=True, blank=True, editable=False)
+        max_length=150, null=True, blank=True)
 
     def __str__(self) -> str:
         if self.user:
@@ -40,23 +40,17 @@ class Profile(models.Model):
         return self.user != None
 
     def save(self, *args, **kwargs):
-        super(Profile, self).save(*args, **kwargs)
-        img = Image.open(self.image.path)
 
-        if img.height > 300 or img.width > 300:
-            output_size = (300, 300)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
-        if not self.sanitized_name:
-            try:
-                name = self.user.username.lower()
-                name = ''.join(name.split())
-                self.sanitized_name = name
-            except AttributeError:
-                name = self.session_id.lower()
-                name = ''.join(name.split())
-                self.sanitized_name = name
-        super().save()
+        # if not self.sanitized_name:
+        try:
+            name = self.user.username.lower()
+            name = ''.join(name.split())
+            self.sanitized_name = name
+        except AttributeError:
+            name = self.session_id.lower()
+            name = ''.join(name.split())
+            self.sanitized_name = name
+        super(Profile, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ['created']

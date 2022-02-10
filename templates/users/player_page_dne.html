@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{%load static%}
+{% block content %}
+
+<div class="container top-buffer">
+    
+    <div class=" row align-items-center mx-auto" style=" width: 800px;">
+
+        <h1>{{username}} Does Not Exist </h1>
+        <!-- UPDATE SEARCH WITH CODE-->
+        <H2>Try searching for another user!</H2>
+        {% include "components/searchbar.html" %}
+        
+        <div class="top-buffer info-card p-4">
+            <p>You can view a players's match record.</p>
+            <p>You can view a summary of player details</p>
+            <p>You can view a players's Win-rate and Statistics</p>
+            <p>You can watch the replay or record(Coming soon!)</p>
+        </div>
+    </div>        
+</div>
+
+{% endblock content %}
