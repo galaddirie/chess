@@ -113,14 +113,6 @@ class GameWebSocketTestCase(TransactionTestCase):
         assert updated_game.fen == 'test_string'
         await communicator.disconnect()
 
-    def test_join_game(self):
-        ...
-
-    def test_two_consumers_have_same_data(self):
-        ...
-
-    def test_two_consumers_have_same_data_after_client_changes(self):
-        ...
     # TODO force sign user in test case so we can
     # test client based events insde recive_json
 
