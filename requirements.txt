@@ -6,7 +6,7 @@ attrs==21.2.0
 autobahn==21.11.1
 Automat==20.2.0
 autopep8==1.6.0
-backports.zoneinfo==0.2.1
+backports.zoneinfo==0.2.1;python_version<"3.9"
 boto3==1.20.43
 botocore==1.23.43
 cffi==1.15.0
