@@ -108,7 +108,6 @@ load_dotenv(find_dotenv())
 
 DATABASES = {
     'default': dj_database_url.config(default='postgres://postgres@db/postgres', conn_max_age=600)
-
 }
 
 
@@ -185,7 +184,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]
+STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
