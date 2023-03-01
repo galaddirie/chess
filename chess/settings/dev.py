@@ -7,6 +7,19 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# development docker postgres database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        "HOST": "db",
+        "PORT": 5432,
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+    }
+}
+
+
 STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
