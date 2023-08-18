@@ -80,6 +80,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'users.middleware.ActiveUserMiddleware',
 ]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = (
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://storage.googleapis.com',
+    'https://googleapis.com',
+)
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://storage.googleapis.com',
+    'https://googleapis.com',
+]
 
 ROOT_URLCONF = 'chess.urls'
 
@@ -184,8 +197,9 @@ CHANNEL_LAYERS = {
         },
     },
 }
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),
-# ]
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
