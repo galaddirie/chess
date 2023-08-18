@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   app:
+    container_name: chess_workspace
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
@@ -19,6 +20,7 @@ services:
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 
   db:
+    container_name: chess_db
     image: postgres:latest
     restart: unless-stopped
     volumes:
@@ -32,6 +34,7 @@ services:
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 
   redis:
+    container_name: chess_redis
     image: redis:latest
     restart: unless-stopped
     volumes: 
