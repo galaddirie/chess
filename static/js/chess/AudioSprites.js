@@ -1,6 +1,6 @@
 "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js" 
 var AudioSpites = new Howl({
-    src: ['../../static/audio/sprites.mp3'],
+    src: ['https://chess-stream.storage.googleapis.com//static/audio/sprites.mp3'],
     sprite: {
         "game_start":   [ 0*1000,  0.9*1000],
         "game_won":     [ 0.9*1000,  1.8*1000],

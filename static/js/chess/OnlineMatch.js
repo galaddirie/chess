@@ -1,4 +1,4 @@
-import { INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE } from '../../vendor/cm-chessboard/src/cm-chessboard/Chessboard.js'
+import { INPUT_EVENT_TYPE, Chessboard, COLOR, BORDER_TYPE, MARKER_TYPE } from 'https://cdn.jsdelivr.net/npm/cm-chessboard@4/src/cm-chessboard/Chessboard.js'
 import { AudioSpites } from './AudioSprites.js'
 
 AudioSpites.once('load', function () {
@@ -43,7 +43,7 @@ var chess = new Chess(),
         // resizes the board based on element size
         animationDuration: 200, // pieces animation duration in milliseconds
         sprite: {
-            url: "./../../static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
+            url: "https://chess-stream.storage.googleapis.com/static/vendor/cm-chessboard/assets/images/chessboard-sprite-staunty.svg", // pieces and markers are stored as svg sprite
             size: 40, // the sprite size, defaults to 40x40px
             cache: true // cache the sprite inline, in the HTML
         }
